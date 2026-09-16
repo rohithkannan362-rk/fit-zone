@@ -51,13 +51,6 @@ const MemberDashboard = () => {
     { date: '12 Sep', time: '07:30 AM', status: '✓' },
   ];
 
-  const notifications = [
-    { id: 1, type: 'alert', text: 'Membership expires in 30 days', icon: Bell, color: 'text-gym-red' },
-    { id: 2, type: 'success', text: 'Payment successful', icon: CheckCircle2, color: 'text-green-500' },
-    { id: 3, type: 'info', text: 'Gym will remain closed on Sunday', icon: Bell, color: 'text-white' },
-    { id: 4, type: 'success', text: 'Attendance marked successfully', icon: CheckCircle2, color: 'text-green-500' },
-  ];
-
   const handleQuickLink = (tab: string) => {
     setActiveTab(tab);
     window.scrollTo({ top: 0, behavior: 'smooth' });
