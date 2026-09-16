@@ -17,13 +17,13 @@ const Login = () => {
 
   useEffect(() => {
     if (user) {
-      if (user.role === 'admin') {
+      if (isAdmin && user.role === 'admin') {
         navigate('/admin');
-      } else {
+      } else if (!isAdmin && user.role !== 'admin') {
         navigate('/dashboard');
       }
     }
-  }, [user, navigate]);
+  }, [user, navigate, isAdmin]);
 
   const handleSendOtp = (e: React.FormEvent) => {
     e.preventDefault();
