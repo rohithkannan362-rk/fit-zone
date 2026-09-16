@@ -1,0 +1,17 @@
+- generic [ref=f1e3]:
+  - link "Return" [ref=f1e5] [cursor=pointer]:
+    - /url: /
+  - generic [ref=f1e9]:
+    - generic [ref=f1e10]:
+      - img "FIT ZONE" [ref=f1e12]
+      - heading "Enter The Zone" [level=2] [ref=f1e13]
+      - paragraph [ref=f1e14]: Verify Your Membership
+    - generic [ref=f1e15]:
+      - generic [ref=f1e17]:
+        - generic [ref=f1e18]: "+91"
+        - textbox "PHONE NUMBER" [ref=f1e19]
+      - button "Proceed" [ref=f1e20]
+      - generic [ref=f1e23]:
+        - paragraph [ref=f1e24]: OTP will be sent to this number
+        - link "Gym Owner Login" [ref=f1e25] [cursor=pointer]:
+          - /url: /login?type=admin

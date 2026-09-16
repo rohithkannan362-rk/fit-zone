@@ -1,0 +1,269 @@
+- generic [ref=e3]:
+  - navigation [ref=e4]:
+    - img "FIT ZONE" [ref=e7]
+    - generic [ref=e8]:
+      - link "Home" [ref=e9] [cursor=pointer]:
+        - /url: "#"
+      - link "About" [ref=e10] [cursor=pointer]:
+        - /url: "#about"
+      - link "Facilities" [ref=e11] [cursor=pointer]:
+        - /url: "#facilities"
+      - link "Plans" [ref=e12] [cursor=pointer]:
+        - /url: "#plans"
+      - link "Gallery" [ref=e13] [cursor=pointer]:
+        - /url: "#gallery"
+      - link "Contact" [ref=e14] [cursor=pointer]:
+        - /url: "#contact"
+    - generic [ref=e15]:
+      - link "Admin Login" [ref=e16] [cursor=pointer]:
+        - /url: /login?type=admin
+      - link "Member Login" [ref=e17] [cursor=pointer]:
+        - /url: /login
+      - link "Join Now" [ref=e18] [cursor=pointer]:
+        - /url: /register?plan=3m
+  - generic [ref=e21]:
+    - img "Muscular back" [ref=e26]
+    - generic [ref=e27]:
+      - generic [ref=e28]: "01"
+      - generic [ref=e29] [cursor=pointer]: "02"
+      - generic [ref=e30] [cursor=pointer]: "03"
+    - generic [ref=e31]:
+      - generic [ref=e32]:
+        - paragraph [ref=e33]:
+          - generic [ref=e34]: Discipline Today
+          - generic [ref=e35]: A Stronger Tomorrow
+        - heading "Invest In Your Strength" [level=1] [ref=e36]:
+          - text: Invest In
+          - generic [ref=e37]: Your Strength
+        - paragraph [ref=e38]: More than a gym. A community that helps you build a stronger, healthier and better you.
+        - generic [ref=e39]:
+          - link "Join Now" [ref=e40] [cursor=pointer]:
+            - /url: /register?plan=3m
+          - link "View Plans" [ref=e43] [cursor=pointer]:
+            - /url: "#plans"
+      - generic [ref=e44]: Scroll Down
+  - generic [ref=e50]:
+    - generic [ref=e57]:
+      - heading "500+" [level=3] [ref=e58]
+      - paragraph [ref=e59]: Happy Members
+    - generic [ref=e67]:
+      - heading "Premium" [level=3] [ref=e68]
+      - paragraph [ref=e69]: Equipment
+    - generic [ref=e74]:
+      - heading "Expert" [level=3] [ref=e75]
+      - paragraph [ref=e76]: Guidance
+    - generic [ref=e80]:
+      - heading "Stronger" [level=3] [ref=e81]
+      - paragraph [ref=e82]: Community
+  - generic [ref=e84]:
+    - generic [ref=e85]:
+      - generic [ref=e91] [cursor=pointer]:
+        - paragraph [ref=e92]: Kariyapatti
+        - paragraph [ref=e93]: Tamil Nadu, 626106
+      - link [ref=e94] [cursor=pointer]:
+        - /url: tel:+917904458158
+        - generic [ref=e98]:
+          - paragraph [ref=e99]: +91 79044 58158
+          - paragraph [ref=e100]: Call Us
+      - link [ref=e101] [cursor=pointer]:
+        - /url: https://wa.me/917904458158
+        - generic [ref=e105]:
+          - paragraph [ref=e106]: WhatsApp
+          - paragraph [ref=e107]: Chat Now
+    - heading "Train Harder Live Better" [level=3] [ref=e110]: Train HarderLive Better
+  - generic [ref=e112]:
+    - generic [ref=e113]:
+      - paragraph [ref=e114]: About Fit Zone
+      - heading "More Than A Gym" [level=2] [ref=e115]: More ThanA Gym
+      - paragraph [ref=e116]: FIT ZONE is Kariyapatti's premier fitness destination. We provide world-class equipment, expert guidance and a motivating environment to help you become the best version of yourself.
+      - generic [ref=e117]:
+        - generic [ref=e118]:
+          - heading "500+" [level=4] [ref=e119]
+          - paragraph [ref=e120]: Members
+        - generic [ref=e121]:
+          - heading "2+" [level=4] [ref=e122]
+          - paragraph [ref=e123]: Years
+        - generic [ref=e124]:
+          - heading "100%" [level=4] [ref=e125]
+          - paragraph [ref=e126]: Commitment
+      - button "Our Story" [ref=e127]
+    - generic [ref=e130]:
+      - img "Gym Floor" [ref=e131]
+      - paragraph [ref=e136]: "\"A healthier tomorrow starts today.\""
+  - generic [ref=e138]:
+    - generic [ref=e139]:
+      - generic [ref=e140]:
+        - paragraph [ref=e141]: Membership Plans
+        - heading "Simple Plans. Bigger Results." [level=2] [ref=e142]
+      - paragraph [ref=e143]: Choose a plan.Start your transformation.
+    - generic [ref=e144]:
+      - generic [ref=e145]:
+        - heading "1 Month" [level=3] [ref=e146]
+        - generic [ref=e147]:
+          - generic [ref=e148]: ₹
+          - generic [ref=e149]: 1,000
+        - list [ref=e151]:
+          - listitem [ref=e152]:
+            - generic [ref=e155]: 1 Month Membership
+          - listitem [ref=e156]:
+            - generic [ref=e159]: Access to all facilities
+          - listitem [ref=e160]:
+            - generic [ref=e163]: Guidance from trainers
+        - link "Join Now" [ref=e164] [cursor=pointer]:
+          - /url: /register?plan=1m
+      - generic [ref=e167]:
+        - heading "3 Months" [level=3] [ref=e168]
+        - generic [ref=e169]:
+          - generic [ref=e170]: ₹
+          - generic [ref=e171]: 3,000
+        - paragraph [ref=e173]: + 1 Month FREE
+        - list [ref=e174]:
+          - listitem [ref=e175]:
+            - generic [ref=e178]: 3 Months Membership
+          - listitem [ref=e179]:
+            - generic [ref=e182]: + 1 Month Free
+          - listitem [ref=e183]:
+            - generic [ref=e186]: Access to all facilities
+        - link "Join Now" [ref=e187] [cursor=pointer]:
+          - /url: /register?plan=3m
+      - generic [ref=e190]:
+        - heading "6 Months" [level=3] [ref=e191]
+        - generic [ref=e192]:
+          - generic [ref=e193]: ₹
+          - generic [ref=e194]: 7,000
+        - paragraph [ref=e196]: + 4 Months FREE
+        - list [ref=e197]:
+          - listitem [ref=e198]:
+            - generic [ref=e201]: 6 Months Membership
+          - listitem [ref=e202]:
+            - generic [ref=e205]: + 4 Months Free
+          - listitem [ref=e206]:
+            - generic [ref=e209]: Best value for results
+        - link "Join Now" [ref=e210] [cursor=pointer]:
+          - /url: /register?plan=6m
+      - generic [ref=e213]:
+        - generic [ref=e214]: Popular
+        - heading "12 Months" [level=3] [ref=e215]
+        - generic [ref=e216]:
+          - generic [ref=e217]: ₹
+          - generic [ref=e218]: 10,000
+        - paragraph [ref=e220]: + 6 Months FREE
+        - list [ref=e221]:
+          - listitem [ref=e222]:
+            - generic [ref=e225]: 12 Months Membership
+          - listitem [ref=e226]:
+            - generic [ref=e229]: + 6 Months Free
+          - listitem [ref=e230]:
+            - generic [ref=e233]: Maximum savings
+          - listitem [ref=e234]:
+            - generic [ref=e237]: Long-term transformation
+        - link "Join Now" [ref=e238] [cursor=pointer]:
+          - /url: /register?plan=12m
+  - generic [ref=e241]:
+    - img "Bg" [ref=e243]
+    - generic [ref=e244]:
+      - generic [ref=e245]:
+        - paragraph [ref=e246]: Facilities
+        - heading "Everything You Need" [level=2] [ref=e247]: EverythingYou Need
+        - paragraph [ref=e248]: Premium Equipment.Perfect Environment.No Excuses.
+      - generic [ref=e249]:
+        - generic [ref=e250]: Strength Training
+        - generic [ref=e258]: Cardio Zone
+        - generic [ref=e262]: Free Weights
+        - generic [ref=e268]: Modern Equipment
+        - generic [ref=e273]: Spacious Workout Area
+        - generic [ref=e280]: Clean Lockers & Showers
+  - generic [ref=e285]:
+    - generic [ref=e286]:
+      - generic [ref=e287]:
+        - paragraph [ref=e288]: Gallery
+        - heading "Inside Fit Zone" [level=2] [ref=e289]: InsideFit Zone
+        - paragraph [ref=e290]: Real people. Real workouts.Real results.
+      - button "View More Photos" [ref=e291]
+    - generic [ref=e294]:
+      - img "Gallery" [ref=e296]
+      - img "Gallery" [ref=e299]
+      - img "Gallery" [ref=e302]
+      - heading "NO EXCUSES JUST RESULTS" [level=3] [ref=e307]
+      - img "Gallery" [ref=e309]
+  - generic [ref=e311]:
+    - generic:
+      - img "Back"
+    - generic [ref=e312]:
+      - generic [ref=e313]:
+        - paragraph [ref=e314]: What Our Members Say
+        - heading "Real People. Real Results." [level=2] [ref=e315]
+      - generic [ref=e316]:
+        - generic [ref=e317]:
+          - paragraph [ref=e321]: Best gym in Kariyapatti! Clean, spacious and great trainers. Highly recommended!
+          - generic [ref=e333]:
+            - img "Avatar" [ref=e335]
+            - generic [ref=e336]:
+              - heading "Arun Prakash" [level=4] [ref=e337]
+              - paragraph [ref=e338]: Member
+        - generic [ref=e339]:
+          - paragraph [ref=e343]: Amazing atmosphere and equipment. The trainers are very supportive. Totally worth it!
+          - generic [ref=e355]:
+            - img "Avatar" [ref=e357]
+            - generic [ref=e358]:
+              - heading "Vijay Kumar" [level=4] [ref=e359]
+              - paragraph [ref=e360]: Member
+        - generic [ref=e361]:
+          - paragraph [ref=e365]: FIT ZONE has completely changed my lifestyle. More than a gym, it's a family.
+          - generic [ref=e377]:
+            - img "Avatar" [ref=e379]
+            - generic [ref=e380]:
+              - heading "Karthik Raja" [level=4] [ref=e381]
+              - paragraph [ref=e382]: Member
+      - paragraph [ref=e384]: Stronger PeopleStronger Community
+  - generic [ref=e387]:
+    - generic [ref=e388]:
+      - paragraph [ref=e389]: Our Location
+      - heading "Visit Us Today" [level=2] [ref=e390]
+      - paragraph [ref=e395]: 1st Floor, Muthu Finance,Jeevaa St, K Karaisal Kulam,Kariyapatti, Tamil Nadu 626106
+      - generic [ref=e396]:
+        - button "Get Directions" [ref=e397]
+        - link "Call" [ref=e401] [cursor=pointer]:
+          - /url: tel:+917904458158
+        - link "WhatsApp" [ref=e404] [cursor=pointer]:
+          - /url: https://wa.me/917904458158
+    - generic [ref=e407]:
+      - generic [ref=e408]:
+        - img "Map Route" [ref=e409]
+        - generic [ref=e411]:
+          - generic [ref=e415]: Fit Zone Gym
+          - generic [ref=e416]: Kariyapatti
+      - heading "Fitness Health Discipline A Better You" [level=3] [ref=e418]: FitnessHealthDisciplineA Better You
+  - contentinfo [ref=e419]:
+    - generic [ref=e420]:
+      - generic [ref=e421]:
+        - img "FIT ZONE" [ref=e423]
+        - paragraph [ref=e424]: Stronger People. Stronger Community.
+      - generic [ref=e425]:
+        - generic [ref=e426]:
+          - link "Home" [ref=e427] [cursor=pointer]:
+            - /url: "#"
+          - link "About" [ref=e428] [cursor=pointer]:
+            - /url: "#about"
+          - link "Facilities" [ref=e429] [cursor=pointer]:
+            - /url: "#facilities"
+          - link "Plans" [ref=e430] [cursor=pointer]:
+            - /url: "#plans"
+          - link "Gallery" [ref=e431] [cursor=pointer]:
+            - /url: "#gallery"
+          - link "Contact" [ref=e432] [cursor=pointer]:
+            - /url: "#contact"
+        - generic [ref=e433]:
+          - paragraph [ref=e434]: © 2026 FIT ZONE GYM. All rights reserved.
+          - generic [ref=e435]:
+            - link "Member Login" [ref=e436] [cursor=pointer]:
+              - /url: /login
+            - generic [ref=e437]: "|"
+            - link "Admin Login" [ref=e438] [cursor=pointer]:
+              - /url: /login?type=admin
+      - generic [ref=e439]:
+        - img [aria-hidden] [ref=e440] [cursor=pointer]
+        - img [aria-hidden] [ref=e442] [cursor=pointer]
+        - img [aria-hidden] [ref=e444] [cursor=pointer]
+        - link [ref=e447] [cursor=pointer]:
+          - /url: "#"
