@@ -1,6 +1,9 @@
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { MapPin, Phone, MessageCircle, Users, Dumbbell, Award, ArrowRight, Activity, Image as ImageIcon, ShieldCheck, Heart, ArrowDown, Check, Star, Quote } from 'lucide-react';
+import { MapPin, Phone, MessageCircle, Users, Dumbbell, Award, ArrowRight, Activity, Image as ImageIcon, ShieldCheck, Heart, ArrowDown, Check, Star, Quote, Loader2 } from 'lucide-react';
 import { motion, useScroll, useTransform } from 'framer-motion';
+import { getActivePackages } from '../services/packageService';
+import { type Package } from '../lib/firestore-schema';
 
 const fadeUp = {
   hidden: { opacity: 0, y: 40 },
@@ -20,6 +23,22 @@ const staggerContainer = {
 const LandingPage = () => {
   const { scrollY } = useScroll();
   const y1 = useTransform(scrollY, [0, 1000], [0, 200]);
+  const [packages, setPackages] = useState<Package[]>([]);
+  const [loadingPackages, setLoadingPackages] = useState(true);
+
+  useEffect(() => {
+    const loadPackages = async () => {
+      try {
+        const pkgs = await getActivePackages();
+        setPackages(pkgs);
+      } catch (error) {
+        console.error('Failed to load packages:', error);
+      } finally {
+        setLoadingPackages(false);
+      }
+    };
+    loadPackages();
+  }, []);
 
   return (
     <div className="min-h-screen bg-[#030303] text-white selection:bg-gym-red selection:text-white font-sans overflow-x-hidden">
@@ -40,6 +59,7 @@ const LandingPage = () => {
         <div className="hidden lg:flex items-center gap-8 text-xs font-bold tracking-widest uppercase">
           <a href="#" className="text-gym-red border-b-2 border-gym-red pb-1">Home</a>
           <a href="#about" className="text-white/60 hover:text-white transition-colors">About</a>
+          <a href="#founder" className="text-white/60 hover:text-white transition-colors">Founder</a>
           <a href="#facilities" className="text-white/60 hover:text-white transition-colors">Facilities</a>
           <a href="#plans" className="text-white/60 hover:text-white transition-colors">Plans</a>
           <a href="#gallery" className="text-white/60 hover:text-white transition-colors">Gallery</a>
@@ -47,13 +67,13 @@ const LandingPage = () => {
         </div>
 
         <div className="flex items-center gap-3 md:gap-4">
-          <Link to="/login?type=admin" className="text-white/60 hover:text-white px-2 py-2 text-[10px] md:text-xs font-bold uppercase tracking-widest transition-all duration-300">
+          <Link to="/admin/login" className="text-white/60 hover:text-white px-2 py-2 text-[10px] md:text-xs font-bold uppercase tracking-widest transition-all duration-300">
             Admin Login
           </Link>
-          <Link to="/login" className="border border-white/20 text-white/90 hover:bg-white hover:text-black px-4 md:px-6 py-2 md:py-2.5 text-[10px] md:text-xs font-bold uppercase tracking-widest transition-all duration-300">
+          <Link to="/member/login" className="border border-white/20 text-white/90 hover:bg-white hover:text-black px-4 md:px-6 py-2 md:py-2.5 text-[10px] md:text-xs font-bold uppercase tracking-widest transition-all duration-300">
             Member Login
           </Link>
-          <Link to="/register?plan=3m" className="bg-gym-red hover:bg-red-600 text-white px-4 md:px-6 py-2 md:py-2.5 text-[10px] md:text-xs font-bold uppercase tracking-widest transition-all duration-300 shadow-[0_0_20px_rgba(255,51,51,0.3)] hover:shadow-[0_0_30px_rgba(255,51,51,0.5)] flex items-center gap-2">
+          <Link to="/member/register" className="bg-gym-red hover:bg-red-600 text-white px-4 md:px-6 py-2 md:py-2.5 text-[10px] md:text-xs font-bold uppercase tracking-widest transition-all duration-300 shadow-[0_0_20px_rgba(255,51,51,0.3)] hover:shadow-[0_0_30px_rgba(255,51,51,0.5)] flex items-center gap-2">
             Join Now <ArrowRight className="w-3 h-3 md:w-4 md:h-4" />
           </Link>
         </div>
@@ -281,6 +301,70 @@ const LandingPage = () => {
         </div>
       </section>
 
+      {/* 5.5 FOUNDER SECTION */}
+      <section id="founder" className="py-32 px-8 border-b border-white/5 relative overflow-hidden bg-[#030303]">
+        <div className="absolute left-0 bottom-0 w-[500px] h-[500px] bg-gym-red rounded-full mix-blend-screen filter blur-[250px] opacity-10 pointer-events-none"></div>
+
+        <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-16 items-center">
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.95 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8 }}
+            className="flex flex-col md:flex-row gap-4"
+          >
+            <div className="relative h-[400px] md:h-[500px] flex-1">
+              <img src="/founder1.jpeg" alt="Master M.Ravichandran" className="w-full h-full object-cover grayscale brightness-90 rounded-sm hover:grayscale-0 transition-all duration-700" />
+            </div>
+            <div className="relative h-[400px] md:h-[500px] flex-1 md:-mt-12">
+              <img src="/founder2.png" alt="Master M.Ravichandran Fitness" className="w-full h-full object-cover grayscale brightness-90 rounded-sm hover:grayscale-0 transition-all duration-700" />
+            </div>
+          </motion.div>
+          
+          <motion.div 
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={staggerContainer}
+          >
+            <motion.p variants={fadeUp} className="text-gym-red text-[10px] font-bold tracking-[0.3em] uppercase mb-4">Meet The Founder</motion.p>
+            <motion.h2 variants={fadeUp} className="text-5xl md:text-7xl font-black uppercase tracking-tighter leading-[0.9] mb-8">
+              Master<br/><span className="text-gym-red">M.Ravichandran</span>
+            </motion.h2>
+            <motion.p variants={fadeUp} className="text-white/60 text-base leading-relaxed mb-6">
+              With years of dedication to health and fitness, Master M.Ravichandran established FIT ZONE to bring a world-class training environment to Kariyapatti.
+            </motion.p>
+            <motion.p variants={fadeUp} className="text-white/60 text-base leading-relaxed mb-12">
+              His vision is simple: to create a community where discipline and hard work lead to a stronger, healthier tomorrow. Whether you are a beginner or a seasoned athlete, his expertise and guidance will help you push your limits.
+            </motion.p>
+            
+            <motion.div variants={fadeUp} className="flex flex-col sm:flex-row items-start sm:items-center gap-6 border-t border-white/10 pt-8">
+              <div className="flex items-center gap-4">
+                <div className="w-16 h-16 bg-gym-red/10 rounded-full flex items-center justify-center border border-gym-red/30">
+                  <Award className="w-8 h-8 text-gym-red" />
+                </div>
+                <div>
+                  <h4 className="font-bold text-lg uppercase tracking-wider text-white">Expert Trainer</h4>
+                  <p className="text-[10px] text-white/50 uppercase tracking-widest mt-1">Certified Professional</p>
+                </div>
+              </div>
+              
+              <div className="hidden sm:block w-px h-12 bg-white/10"></div>
+              
+              <a href="tel:+917904458158" className="flex items-center gap-4 group cursor-pointer hover:bg-white/5 p-2 rounded-lg transition-colors">
+                <div className="w-12 h-12 bg-gym-red/10 rounded-full flex items-center justify-center border border-gym-red/20 group-hover:bg-gym-red transition-colors">
+                  <Phone className="w-5 h-5 text-gym-red group-hover:text-white transition-colors" />
+                </div>
+                <div>
+                  <h4 className="font-bold text-sm uppercase tracking-wider text-white">+91 79044 58158</h4>
+                  <p className="text-[10px] text-white/50 uppercase tracking-widest mt-1">Contact Master</p>
+                </div>
+              </a>
+            </motion.div>
+          </motion.div>
+        </div>
+      </section>
+
       {/* 6. PLANS SECTION */}
       <section id="plans" className="py-32 px-8 border-b border-white/5 bg-[#050505]">
         <div className="max-w-7xl mx-auto">
@@ -294,57 +378,58 @@ const LandingPage = () => {
             </motion.p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {[
-              { id: '1m', duration: '1 Month', offer: null, price: '1,000', features: ['1 Month Membership', 'Access to all facilities', 'Guidance from trainers'] },
-              { id: '3m', duration: '3 Months', offer: '+ 1 Month FREE', price: '3,000', features: ['3 Months Membership', '+ 1 Month Free', 'Access to all facilities'] },
-              { id: '6m', duration: '6 Months', offer: '+ 4 Months FREE', price: '7,000', features: ['6 Months Membership', '+ 4 Months Free', 'Best value for results'] },
-              { id: '12m', duration: '12 Months', offer: '+ 6 Months FREE', price: '10,000', popular: true, features: ['12 Months Membership', '+ 6 Months Free', 'Maximum savings', 'Long-term transformation'] },
-            ].map((plan, idx) => (
-              <motion.div 
-                key={idx}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: idx * 0.1 }}
-                className={`relative p-8 rounded-sm transition-all duration-300 hover:-translate-y-2 flex flex-col group ${plan.popular ? 'bg-[#0a0a0a] border border-gym-red shadow-[0_0_30px_rgba(255,51,51,0.15)]' : 'bg-[#0a0a0a] border border-white/10 hover:border-white/30'}`}
-              >
-                {plan.popular && (
-                  <div className="absolute -top-3 right-4 bg-gym-red text-white text-[10px] font-bold uppercase tracking-widest px-4 py-1 rounded-sm shadow-[0_0_10px_rgba(255,51,51,0.5)]">
-                    Popular
+          {loadingPackages ? (
+            <div className="flex justify-center py-20 w-full col-span-full">
+              <Loader2 className="w-8 h-8 text-gym-red animate-spin" />
+            </div>
+          ) : (
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 w-full">
+              {packages.map((plan, idx) => (
+                <motion.div 
+                  key={plan.id || idx}
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5, delay: idx * 0.1 }}
+                  className={`relative p-8 rounded-sm transition-all duration-300 hover:-translate-y-2 flex flex-col group ${plan.popular ? 'bg-[#0a0a0a] border border-gym-red shadow-[0_0_30px_rgba(255,51,51,0.15)]' : 'bg-[#0a0a0a] border border-white/10 hover:border-white/30'}`}
+                >
+                  {plan.popular && (
+                    <div className="absolute -top-3 right-4 bg-gym-red text-white text-[10px] font-bold uppercase tracking-widest px-4 py-1 rounded-sm shadow-[0_0_10px_rgba(255,51,51,0.5)]">
+                      Popular
+                    </div>
+                  )}
+                  
+                  <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] mb-4 text-center text-white/50">{plan.name}</h3>
+                  
+                  <div className="flex items-start justify-center gap-1 mb-2">
+                    <span className="text-xl font-bold mt-1">₹</span>
+                    <span className="text-5xl font-black">{plan.price.toLocaleString('en-IN')}</span>
                   </div>
-                )}
-                
-                <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] mb-4 text-center text-white/50">{plan.duration}</h3>
-                
-                <div className="flex items-start justify-center gap-1 mb-2">
-                  <span className="text-xl font-bold mt-1">₹</span>
-                  <span className="text-5xl font-black">{plan.price}</span>
-                </div>
-                
-                <div className="h-6 mb-8 text-center">
-                  {plan.offer && <p className="text-xs font-bold tracking-widest text-gym-red">{plan.offer}</p>}
-                </div>
-                
-                <ul className="space-y-4 mb-8 flex-1">
-                  {plan.features.map((feature, fIdx) => (
-                    <li key={fIdx} className="flex items-start gap-3 text-[11px] font-medium tracking-wide text-white/70">
-                      <Check className="w-4 h-4 text-gym-red shrink-0" />
-                      <span>{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-                
-                <Link to={`/register?plan=${plan.id}`} className={`w-full py-4 rounded-sm text-[10px] font-bold uppercase tracking-widest transition-colors flex items-center justify-center gap-2 ${
-                  plan.popular ? 'bg-gym-red text-white hover:bg-red-600' : 'border border-white/20 text-white hover:border-white'
-                }`}>
-                  Join Now <ArrowRight className="w-3 h-3" />
-                </Link>
+                  
+                  <div className="h-6 mb-8 text-center">
+                    {plan.offer && <p className="text-xs font-bold tracking-widest text-gym-red">{plan.offer}</p>}
+                  </div>
+                  
+                  <ul className="space-y-4 mb-8 flex-1">
+                    {plan.features.map((feature, fIdx) => (
+                      <li key={fIdx} className="flex items-start gap-3 text-[11px] font-medium tracking-wide text-white/70">
+                        <Check className="w-4 h-4 text-gym-red shrink-0" />
+                        <span>{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  
+                  <Link to={`/member/register?plan=${plan.id}`} className={`w-full py-4 rounded-sm text-[10px] font-bold uppercase tracking-widest transition-colors flex items-center justify-center gap-2 ${
+                    plan.popular ? 'bg-gym-red text-white hover:bg-red-600' : 'border border-white/20 text-white hover:border-white'
+                  }`}>
+                    Join Now <ArrowRight className="w-3 h-3" />
+                  </Link>
 
-                <div className={`absolute inset-0 pointer-events-none transition-opacity duration-500 opacity-0 group-hover:opacity-100 ${plan.popular ? 'shadow-[0_0_50px_rgba(255,51,51,0.2)]' : ''}`}></div>
-              </motion.div>
-            ))}
-          </div>
+                  <div className={`absolute inset-0 pointer-events-none transition-opacity duration-500 opacity-0 group-hover:opacity-100 ${plan.popular ? 'shadow-[0_0_50px_rgba(255,51,51,0.2)]' : ''}`}></div>
+                </motion.div>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
@@ -558,6 +643,7 @@ const LandingPage = () => {
             <div className="flex flex-wrap justify-center gap-x-8 gap-y-4 text-[10px] font-bold tracking-[0.2em] uppercase text-white/50">
               <a href="#" className="hover:text-white transition-colors">Home</a>
               <a href="#about" className="hover:text-white transition-colors">About</a>
+              <a href="#founder" className="hover:text-white transition-colors">Founder</a>
               <a href="#facilities" className="hover:text-white transition-colors">Facilities</a>
               <a href="#plans" className="hover:text-white transition-colors">Plans</a>
               <a href="#gallery" className="hover:text-white transition-colors">Gallery</a>

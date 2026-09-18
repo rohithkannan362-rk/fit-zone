@@ -1,0 +1,164 @@
+import { useState, useEffect } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import { ArrowRight, Check, ChevronLeft, Loader2 } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { useAuth } from '../../context/AuthContext';
+import { getActivePackages } from '../../services/packageService';
+import { type Package } from '../../lib/firestore-schema';
+import { formatCurrency } from '../../utils/dateUtils';
+
+const PackageSelection = () => {
+  const [packages, setPackages] = useState<Package[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const { user } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    loadPackages();
+  }, []);
+
+  const loadPackages = async () => {
+    try {
+      setError(null);
+      const pkgs = await getActivePackages();
+      setPackages(pkgs);
+      // Auto-select the popular one or first
+      const popular = pkgs.find(p => p.popular);
+      if (popular?.id) setSelectedId(popular.id);
+      else if (pkgs[0]?.id) setSelectedId(pkgs[0].id);
+    } catch (error) {
+      console.error('Failed to load packages:', error);
+      setError('Failed to load packages. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const selectedPackage = packages.find(p => p.id === selectedId);
+
+  const handleSelect = () => {
+    if (!selectedId) return;
+    navigate(`/member/payment?packageId=${selectedId}`);
+  };
+
+  return (
+    <div className="min-h-screen bg-[#030303] text-white py-20 px-6 relative overflow-hidden">
+      <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
+      <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-gym-red/5 rounded-full mix-blend-screen filter blur-[200px] opacity-40 pointer-events-none"></div>
+
+      <Link to="/member/dashboard" className="absolute top-8 left-8 text-white/50 hover:text-white flex items-center gap-2 transition-colors z-20">
+        <ChevronLeft className="w-5 h-5" />
+        <span className="font-bold tracking-widest text-sm uppercase">Back</span>
+      </Link>
+
+      <div className="max-w-4xl mx-auto relative z-10">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-center mb-16"
+        >
+          <div className="inline-block bg-white p-2 rounded-sm shadow-[0_0_20px_rgba(255,51,51,0.2)] mb-6">
+            <img src="/logo.jpg" alt="FIT ZONE" className="h-10 w-auto object-contain" />
+          </div>
+          <h1 className="text-4xl md:text-5xl font-black uppercase tracking-tighter mb-3">
+            {user?.member ? 'Renew' : 'Welcome to'} <span className="text-gym-red">FIT ZONE</span>
+          </h1>
+          <p className="text-white/60 mt-4 max-w-lg mx-auto">Select a membership package to begin your fitness journey.</p>
+        </motion.div>
+
+        {loading ? (
+          <div className="flex flex-col items-center justify-center py-20">
+            <Loader2 className="w-10 h-10 text-gym-red animate-spin mb-4" />
+            <p className="text-white/50 text-sm tracking-widest uppercase">Loading packages...</p>
+          </div>
+        ) : error ? (
+          <div className="text-center py-20">
+            <p className="text-red-500 mb-6">{error}</p>
+            <button onClick={() => { setLoading(true); loadPackages(); }} className="bg-gym-red hover:bg-red-600 text-white px-8 py-3 text-xs font-bold uppercase tracking-widest transition-colors inline-flex items-center gap-2">
+              Retry
+            </button>
+          </div>
+        ) : (
+          <>
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+              {packages.map((pkg, idx) => (
+                <motion.div
+                  key={pkg.id}
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: idx * 0.1 }}
+                  onClick={() => setSelectedId(pkg.id!)}
+                  className={`relative p-8 rounded-sm cursor-pointer transition-all duration-300 hover:-translate-y-2 flex flex-col group ${
+                    selectedId === pkg.id
+                      ? 'bg-[#0a0a0a] border-2 border-gym-red shadow-[0_0_30px_rgba(255,51,51,0.15)]'
+                      : 'bg-[#0a0a0a] border-2 border-white/10 hover:border-white/30'
+                  }`}
+                >
+                  {pkg.popular && (
+                    <div className="absolute -top-3 right-4 bg-gym-red text-white text-[10px] font-bold uppercase tracking-widest px-4 py-1 rounded-sm shadow-[0_0_10px_rgba(255,51,51,0.5)]">
+                      Popular
+                    </div>
+                  )}
+
+                  {selectedId === pkg.id && (
+                    <div className="absolute top-4 left-4 w-6 h-6 bg-gym-red rounded-full flex items-center justify-center">
+                      <Check className="w-4 h-4 text-white" />
+                    </div>
+                  )}
+
+                  <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] mb-4 text-center text-white/50">
+                    {pkg.name}
+                  </h3>
+
+                  <div className="flex items-start justify-center gap-1 mb-2">
+                    <span className="text-xl font-bold mt-1">₹</span>
+                    <span className="text-5xl font-black">{pkg.price.toLocaleString('en-IN')}</span>
+                  </div>
+
+                  <div className="h-6 mb-6 text-center">
+                    {pkg.offer && (
+                      <p className="text-xs font-bold tracking-widest text-gym-red">{pkg.offer}</p>
+                    )}
+                  </div>
+
+                  <div className="text-center text-white/40 text-[10px] font-bold uppercase tracking-widest mb-6">
+                    {pkg.durationMonths} {pkg.durationMonths === 1 ? 'Month' : 'Months'}
+                  </div>
+
+                  <ul className="space-y-3 flex-1">
+                    {pkg.features.map((feature, fIdx) => (
+                      <li key={fIdx} className="flex items-start gap-3 text-[11px] font-medium tracking-wide text-white/70">
+                        <Check className="w-4 h-4 text-gym-red shrink-0" />
+                        <span>{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </motion.div>
+              ))}
+            </div>
+
+            {selectedPackage && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="text-center"
+              >
+                <button
+                  onClick={handleSelect}
+                  className="bg-gym-red hover:bg-red-600 text-white px-12 py-5 text-sm font-bold uppercase tracking-widest transition-all duration-300 shadow-[0_0_30px_rgba(255,51,51,0.4)] hover:shadow-[0_0_50px_rgba(255,51,51,0.6)] inline-flex items-center gap-3"
+                >
+                  Continue with {selectedPackage.name} — {formatCurrency(selectedPackage.price)}
+                  <ArrowRight className="w-5 h-5" />
+                </button>
+              </motion.div>
+            )}
+          </>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default PackageSelection;
