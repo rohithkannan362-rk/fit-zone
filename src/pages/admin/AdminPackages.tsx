@@ -1,10 +1,23 @@
-import { useState, useEffect } from 'react';
-import { Plus, Edit3, ToggleLeft, ToggleRight, Check, X, Package as PackageIcon } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { getAllPackages, createPackage, updatePackage, deactivatePackage } from '../../services/packageService';
-import { type Package } from '../../lib/firestore-schema';
-import { formatCurrency } from '../../utils/dateUtils';
-import LoadingSpinner from '../../components/ui/LoadingSpinner';
+import { useState, useEffect } from "react";
+import {
+  Plus,
+  Edit3,
+  ToggleLeft,
+  ToggleRight,
+  X,
+  Package as PackageIcon,
+} from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  getAllPackages,
+  createPackage,
+  updatePackage,
+  deactivatePackage,
+} from "../../services/packageService";
+import { type Package } from "../../lib/supabase-types";
+import { formatCurrency } from "../../utils/dateUtils";
+import LoadingSpinner from "../../components/ui/LoadingSpinner";
+import BackButton from "../../components/ui/BackButton";
 
 const AdminPackages = () => {
   const [packages, setPackages] = useState<Package[]>([]);
@@ -13,11 +26,13 @@ const AdminPackages = () => {
   const [editPkg, setEditPkg] = useState<Package | null>(null);
 
   // Form state
-  const [name, setName] = useState('');
+  const [name, setName] = useState("");
   const [durationMonths, setDurationMonths] = useState(1);
+  const [freeMonths, setFreeMonths] = useState(0);
+  const [totalMonths, setTotalMonths] = useState(1);
   const [price, setPrice] = useState(0);
-  const [features, setFeatures] = useState('');
-  const [offer, setOffer] = useState('');
+  const [features, setFeatures] = useState("");
+  const [offer, setOffer] = useState("");
   const [popular, setPopular] = useState(false);
   const [saving, setSaving] = useState(false);
 
@@ -30,18 +45,20 @@ const AdminPackages = () => {
       const pkgs = await getAllPackages();
       setPackages(pkgs);
     } catch (error) {
-      console.error('Failed to load packages:', error);
+      console.error("Failed to load packages:", error);
     } finally {
       setLoading(false);
     }
   };
 
   const resetForm = () => {
-    setName('');
+    setName("");
     setDurationMonths(1);
+    setFreeMonths(0);
+    setTotalMonths(1);
     setPrice(0);
-    setFeatures('');
-    setOffer('');
+    setFeatures("");
+    setOffer("");
     setPopular(false);
     setEditPkg(null);
     setShowForm(false);
@@ -50,10 +67,12 @@ const AdminPackages = () => {
   const openEdit = (pkg: Package) => {
     setEditPkg(pkg);
     setName(pkg.name);
-    setDurationMonths(pkg.durationMonths);
+    setDurationMonths(pkg.duration_months);
+    setFreeMonths(pkg.free_months);
+    setTotalMonths(pkg.total_months);
     setPrice(pkg.price);
-    setFeatures(pkg.features.join('\n'));
-    setOffer(pkg.offer || '');
+    setFeatures(pkg.features.join("\n"));
+    setOffer(pkg.offer || "");
     setPopular(pkg.popular || false);
     setShowForm(true);
   };
@@ -66,10 +85,12 @@ const AdminPackages = () => {
     try {
       const data = {
         name,
-        durationMonths,
+        duration_months: durationMonths,
+        free_months: freeMonths,
+        total_months: totalMonths,
         price,
-        features: features.split('\n').filter(f => f.trim()),
-        offer: offer || undefined,
+        features: features.split("\n").filter((f) => f.trim()),
+        offer: offer || null,
         popular,
       };
 
@@ -82,7 +103,7 @@ const AdminPackages = () => {
       resetForm();
       await loadPackages();
     } catch (error) {
-      console.error('Failed to save package:', error);
+      console.error("Failed to save package:", error);
     } finally {
       setSaving(false);
     }
@@ -91,13 +112,13 @@ const AdminPackages = () => {
   const handleToggleActive = async (pkg: Package) => {
     try {
       if (pkg.active) {
-        await deactivatePackage(pkg.id!);
+        await deactivatePackage(pkg.id);
       } else {
-        await updatePackage(pkg.id!, { active: true } as any);
+        await updatePackage(pkg.id, { active: true });
       }
       await loadPackages();
     } catch (error) {
-      console.error('Failed to toggle package:', error);
+      console.error("Failed to toggle package:", error);
     }
   };
 
@@ -106,6 +127,7 @@ const AdminPackages = () => {
   return (
     <div className="min-h-screen bg-[#030303] text-white p-6 md:p-12">
       <div className="max-w-4xl mx-auto">
+        <BackButton to="/admin" label="BACK TO DASHBOARD" />
         <div className="flex justify-between items-end mb-10">
           <div>
             <h2 className="text-3xl md:text-4xl font-black uppercase tracking-tighter mb-2">
@@ -116,7 +138,10 @@ const AdminPackages = () => {
             </p>
           </div>
           <button
-            onClick={() => { resetForm(); setShowForm(true); }}
+            onClick={() => {
+              resetForm();
+              setShowForm(true);
+            }}
             className="bg-gym-red hover:bg-white hover:text-black text-white px-6 py-3 text-[10px] font-bold uppercase tracking-widest transition-all flex items-center gap-2 rounded-lg"
           >
             <Plus className="w-4 h-4" /> New Package
@@ -132,51 +157,151 @@ const AdminPackages = () => {
               exit={{ opacity: 0, y: -20 }}
               className="bg-gradient-to-b from-white/[0.05] to-transparent p-[1px] rounded-2xl mb-8"
             >
-              <form onSubmit={handleSubmit} className="bg-[#080808] rounded-[15px] p-8 space-y-5">
+              <form
+                onSubmit={handleSubmit}
+                className="bg-[#080808] rounded-[15px] p-8 space-y-5"
+              >
                 <div className="flex justify-between items-center mb-4">
                   <h3 className="text-sm font-black uppercase tracking-widest">
-                    {editPkg ? 'Edit Package' : 'New Package'}
+                    {editPkg ? "Edit Package" : "New Package"}
                   </h3>
-                  <button type="button" onClick={resetForm} className="text-white/40 hover:text-white">
+                  <button
+                    type="button"
+                    onClick={resetForm}
+                    className="text-white/40 hover:text-white"
+                  >
                     <X className="w-5 h-5" />
                   </button>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-[10px] font-bold uppercase tracking-widest text-white/60 mb-2">Name</label>
-                    <input value={name} onChange={e => setName(e.target.value)} className="w-full bg-[#111] border border-white/10 rounded-lg py-3 px-4 text-sm font-bold text-white focus:outline-none focus:border-gym-red" required />
+                    <label className="block text-[10px] font-bold uppercase tracking-widest text-white/60 mb-2">
+                      Name
+                    </label>
+                    <input
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      className="w-full bg-[#111] border border-white/10 rounded-lg py-3 px-4 text-sm font-bold text-white focus:outline-none focus:border-gym-red"
+                      required
+                    />
                   </div>
                   <div>
-                    <label className="block text-[10px] font-bold uppercase tracking-widest text-white/60 mb-2">Duration (months)</label>
-                    <input type="number" min={1} value={durationMonths} onChange={e => setDurationMonths(Number(e.target.value))} className="w-full bg-[#111] border border-white/10 rounded-lg py-3 px-4 text-sm font-bold text-white focus:outline-none focus:border-gym-red" required />
+                    <label className="block text-[10px] font-bold uppercase tracking-widest text-white/60 mb-2">
+                      Duration (months)
+                    </label>
+                    <input
+                      type="number"
+                      min={1}
+                      value={durationMonths}
+                      onChange={(e) =>
+                        setDurationMonths(Number(e.target.value))
+                      }
+                      className="w-full bg-[#111] border border-white/10 rounded-lg py-3 px-4 text-sm font-bold text-white focus:outline-none focus:border-gym-red"
+                      required
+                    />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-[10px] font-bold uppercase tracking-widest text-white/60 mb-2">Price (₹)</label>
-                    <input type="number" min={0} value={price} onChange={e => setPrice(Number(e.target.value))} className="w-full bg-[#111] border border-white/10 rounded-lg py-3 px-4 text-sm font-bold text-white focus:outline-none focus:border-gym-red" required />
+                    <label className="block text-[10px] font-bold uppercase tracking-widest text-white/60 mb-2">
+                      Free Months
+                    </label>
+                    <input
+                      type="number"
+                      min={0}
+                      value={freeMonths}
+                      onChange={(e) =>
+                        setFreeMonths(Number(e.target.value))
+                      }
+                      className="w-full bg-[#111] border border-white/10 rounded-lg py-3 px-4 text-sm font-bold text-white focus:outline-none focus:border-gym-red"
+                      required
+                    />
                   </div>
                   <div>
-                    <label className="block text-[10px] font-bold uppercase tracking-widest text-white/60 mb-2">Offer Tag</label>
-                    <input value={offer} onChange={e => setOffer(e.target.value)} placeholder="e.g. Save ₹1,000" className="w-full bg-[#111] border border-white/10 rounded-lg py-3 px-4 text-sm font-bold text-white focus:outline-none focus:border-gym-red placeholder:text-white/20" />
+                    <label className="block text-[10px] font-bold uppercase tracking-widest text-white/60 mb-2">
+                      Total Months
+                    </label>
+                    <input
+                      type="number"
+                      min={1}
+                      value={totalMonths}
+                      onChange={(e) =>
+                        setTotalMonths(Number(e.target.value))
+                      }
+                      className="w-full bg-[#111] border border-white/10 rounded-lg py-3 px-4 text-sm font-bold text-white focus:outline-none focus:border-gym-red"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-[10px] font-bold uppercase tracking-widest text-white/60 mb-2">
+                      Price (₹)
+                    </label>
+                    <input
+                      type="number"
+                      min={0}
+                      value={price}
+                      onChange={(e) => setPrice(Number(e.target.value))}
+                      className="w-full bg-[#111] border border-white/10 rounded-lg py-3 px-4 text-sm font-bold text-white focus:outline-none focus:border-gym-red"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-bold uppercase tracking-widest text-white/60 mb-2">
+                      Offer Tag
+                    </label>
+                    <input
+                      value={offer}
+                      onChange={(e) => setOffer(e.target.value)}
+                      placeholder="e.g. Save ₹1,000"
+                      className="w-full bg-[#111] border border-white/10 rounded-lg py-3 px-4 text-sm font-bold text-white focus:outline-none focus:border-gym-red placeholder:text-white/20"
+                    />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-[10px] font-bold uppercase tracking-widest text-white/60 mb-2">Features (one per line)</label>
-                  <textarea value={features} onChange={e => setFeatures(e.target.value)} rows={3} className="w-full bg-[#111] border border-white/10 rounded-lg py-3 px-4 text-sm text-white focus:outline-none focus:border-gym-red resize-none" />
+                  <label className="block text-[10px] font-bold uppercase tracking-widest text-white/60 mb-2">
+                    Features (one per line)
+                  </label>
+                  <textarea
+                    value={features}
+                    onChange={(e) => setFeatures(e.target.value)}
+                    rows={3}
+                    className="w-full bg-[#111] border border-white/10 rounded-lg py-3 px-4 text-sm text-white focus:outline-none focus:border-gym-red resize-none"
+                  />
                 </div>
 
                 <label className="flex items-center gap-3 cursor-pointer">
-                  <input type="checkbox" checked={popular} onChange={e => setPopular(e.target.checked)} className="sr-only" />
-                  {popular ? <ToggleRight className="w-6 h-6 text-gym-red" /> : <ToggleLeft className="w-6 h-6 text-white/40" />}
-                  <span className="text-[10px] font-bold uppercase tracking-widest text-white/60">Mark as Popular</span>
+                  <input
+                    type="checkbox"
+                    checked={popular}
+                    onChange={(e) => setPopular(e.target.checked)}
+                    className="sr-only"
+                  />
+                  {popular ? (
+                    <ToggleRight className="w-6 h-6 text-gym-red" />
+                  ) : (
+                    <ToggleLeft className="w-6 h-6 text-white/40" />
+                  )}
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-white/60">
+                    Mark as Popular
+                  </span>
                 </label>
 
-                <button type="submit" disabled={saving} className="btn-primary w-full flex items-center justify-center gap-2 disabled:opacity-50">
-                  {saving ? 'Saving...' : editPkg ? 'Update Package' : 'Create Package'}
+                <button
+                  type="submit"
+                  disabled={saving}
+                  className="btn-primary w-full flex items-center justify-center gap-2 disabled:opacity-50"
+                >
+                  {saving
+                    ? "Saving..."
+                    : editPkg
+                      ? "Update Package"
+                      : "Create Package"}
                 </button>
               </form>
             </motion.div>
@@ -189,7 +314,7 @@ const AdminPackages = () => {
             <motion.div
               key={pkg.id}
               layout
-              className={`bg-gradient-to-b from-white/[0.05] to-transparent p-[1px] rounded-2xl ${!pkg.active ? 'opacity-50' : ''}`}
+              className={`bg-gradient-to-b from-white/[0.05] to-transparent p-[1px] rounded-2xl ${!pkg.active ? "opacity-50" : ""}`}
             >
               <div className="bg-[#080808] rounded-[15px] p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
                 <div className="flex items-center gap-4">
@@ -198,27 +323,48 @@ const AdminPackages = () => {
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
-                      <h3 className="font-bold text-sm uppercase tracking-widest">{pkg.name}</h3>
+                      <h3 className="font-bold text-sm uppercase tracking-widest">
+                        {pkg.name}
+                      </h3>
                       {pkg.popular && (
-                        <span className="bg-gym-red/20 text-gym-red text-[8px] font-bold uppercase tracking-widest px-2 py-0.5 rounded">Popular</span>
+                        <span className="bg-gym-red/20 text-gym-red text-[8px] font-bold uppercase tracking-widest px-2 py-0.5 rounded">
+                          Popular
+                        </span>
                       )}
                       {!pkg.active && (
-                        <span className="bg-white/5 text-white/40 text-[8px] font-bold uppercase tracking-widest px-2 py-0.5 rounded">Inactive</span>
+                        <span className="bg-white/5 text-white/40 text-[8px] font-bold uppercase tracking-widest px-2 py-0.5 rounded">
+                          Inactive
+                        </span>
                       )}
                     </div>
                     <p className="text-[10px] text-white/40 font-bold tracking-widest mt-1">
-                      {pkg.durationMonths} {pkg.durationMonths === 1 ? 'month' : 'months'} • {pkg.features.length} features
+                      {pkg.total_months}{" "}
+                      {pkg.total_months === 1 ? "month total" : "months total"} •{" "}
+                      {pkg.free_months} free •{" "}
+                      {pkg.features.length} features
                     </p>
                   </div>
                 </div>
 
                 <div className="flex items-center gap-4">
-                  <span className="text-2xl font-black">{formatCurrency(pkg.price)}</span>
-                  <button onClick={() => openEdit(pkg)} className="px-3 py-2 bg-white/5 hover:bg-white/10 rounded-lg transition-colors">
+                  <span className="text-2xl font-black">
+                    {formatCurrency(pkg.price)}
+                  </span>
+                  <button
+                    onClick={() => openEdit(pkg)}
+                    className="px-3 py-2 bg-white/5 hover:bg-white/10 rounded-lg transition-colors"
+                  >
                     <Edit3 className="w-4 h-4 text-white/50" />
                   </button>
-                  <button onClick={() => handleToggleActive(pkg)} className="px-3 py-2 bg-white/5 hover:bg-white/10 rounded-lg transition-colors">
-                    {pkg.active ? <ToggleRight className="w-5 h-5 text-green-500" /> : <ToggleLeft className="w-5 h-5 text-white/40" />}
+                  <button
+                    onClick={() => handleToggleActive(pkg)}
+                    className="px-3 py-2 bg-white/5 hover:bg-white/10 rounded-lg transition-colors"
+                  >
+                    {pkg.active ? (
+                      <ToggleRight className="w-5 h-5 text-green-500" />
+                    ) : (
+                      <ToggleLeft className="w-5 h-5 text-white/40" />
+                    )}
                   </button>
                 </div>
               </div>

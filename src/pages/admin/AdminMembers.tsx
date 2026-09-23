@@ -1,20 +1,21 @@
-import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { Search, Plus, ChevronRight, Users, Filter } from 'lucide-react';
-import { motion } from 'framer-motion';
-import { getAllMembers } from '../../services/memberService';
-import { getAllMemberships } from '../../services/membershipService';
-import { type Member, type Membership } from '../../lib/firestore-schema';
-import { formatTimestamp, getMembershipStatus } from '../../utils/dateUtils';
-import StatusBadge from '../../components/ui/StatusBadge';
-import LoadingSpinner from '../../components/ui/LoadingSpinner';
-import EmptyState from '../../components/ui/EmptyState';
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { Search, Plus, ChevronRight, Users } from "lucide-react";
+import { motion } from "framer-motion";
+import { getAllMembers } from "../../services/memberService";
+import { getAllMemberships } from "../../services/membershipService";
+import { type Profile, type Membership } from "../../lib/supabase-types";
+import { formatTimestamp, getMembershipStatus } from "../../utils/dateUtils";
+import StatusBadge from "../../components/ui/StatusBadge";
+import LoadingSpinner from "../../components/ui/LoadingSpinner";
+import EmptyState from "../../components/ui/EmptyState";
+import BackButton from "../../components/ui/BackButton";
 
 const AdminMembers = () => {
-  const [members, setMembers] = useState<Member[]>([]);
+  const [members, setMembers] = useState<Profile[]>([]);
   const [memberships, setMemberships] = useState<Membership[]>([]);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
+  const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
@@ -24,14 +25,11 @@ const AdminMembers = () => {
 
   const loadData = async () => {
     try {
-      const [m, ms] = await Promise.all([
-        getAllMembers(),
-        getAllMemberships(),
-      ]);
+      const [m, ms] = await Promise.all([getAllMembers(), getAllMemberships()]);
       setMembers(m);
       setMemberships(ms);
     } catch (error) {
-      console.error('Failed to load members:', error);
+      console.error("Failed to load members:", error);
     } finally {
       setLoading(false);
     }
@@ -39,13 +37,16 @@ const AdminMembers = () => {
 
   // Map member to their latest membership
   const getMemberMembership = (memberId: string): Membership | undefined => {
-    return memberships.find(ms => ms.memberId === memberId);
+    return memberships.find((ms) => ms.member_id === memberId);
   };
 
   const getMemberStatus = (memberId: string): string => {
     const ms = getMemberMembership(memberId);
-    if (!ms) return 'inactive';
-    return getMembershipStatus(ms.endDate.toDate(), ms.nextDueDate.toDate());
+    if (!ms) return "inactive";
+    return getMembershipStatus(
+      new Date(ms.end_date),
+      new Date(ms.next_due_date),
+    );
   };
 
   // Filter members
@@ -53,28 +54,44 @@ const AdminMembers = () => {
 
   if (searchQuery) {
     const q = searchQuery.toLowerCase();
-    filteredMembers = filteredMembers.filter(m =>
-      m.name.toLowerCase().includes(q) ||
-      m.mobile.includes(searchQuery) ||
-      m.memberCode.toLowerCase().includes(q) ||
-      m.email.toLowerCase().includes(q)
+    filteredMembers = filteredMembers.filter(
+      (m) =>
+        m.full_name.toLowerCase().includes(q) ||
+        m.mobile.includes(searchQuery) ||
+        m.member_code.toLowerCase().includes(q) ||
+        m.email.toLowerCase().includes(q),
     );
   }
 
-  if (statusFilter !== 'all') {
-    filteredMembers = filteredMembers.filter(m => {
-      const status = getMemberStatus(m.id!);
-      return status === statusFilter;
+  if (statusFilter !== "all") {
+    filteredMembers = filteredMembers.filter((m) => {
+      const ms = getMemberMembership(m.id);
+
+      if (statusFilter === "paused") {
+        return ms?.reminder_status === "paused";
+      }
+
+      if (statusFilter === "expired") {
+        return ms?.status === "expired" || getMemberStatus(m.id) === "expired";
+      }
+
+      if (statusFilter === "inactive") {
+        return !ms;
+      }
+
+      return getMemberStatus(m.id) === statusFilter;
     });
   }
 
   const statusFilters = [
-    { value: 'all', label: 'All' },
-    { value: 'active', label: 'Active' },
-    { value: 'due_soon', label: 'Due Soon' },
-    { value: 'due_today', label: 'Due Today' },
-    { value: 'overdue', label: 'Overdue' },
-    { value: 'inactive', label: 'No Plan' },
+    { value: "all", label: "All" },
+    { value: "active", label: "Active" },
+    { value: "due_soon", label: "Due Soon" },
+    { value: "due_today", label: "Due Today" },
+    { value: "overdue", label: "Overdue" },
+    { value: "paused", label: "Paused" },
+    { value: "expired", label: "Expired" },
+    { value: "inactive", label: "No Plan" },
   ];
 
   if (loading) return <LoadingSpinner message="Loading members..." />;
@@ -82,6 +99,7 @@ const AdminMembers = () => {
   return (
     <div className="min-h-screen bg-[#030303] text-white p-6 md:p-12">
       <div className="max-w-6xl mx-auto">
+        <BackButton to="/admin" label="BACK TO DASHBOARD" />
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 mb-10">
           <div>
             <h2 className="text-3xl md:text-4xl font-black uppercase tracking-tighter mb-2">
@@ -92,7 +110,7 @@ const AdminMembers = () => {
             </p>
           </div>
           <button
-            onClick={() => navigate('/member/register')}
+            onClick={() => navigate("/admin/members/new")}
             className="bg-gym-red hover:bg-white hover:text-black text-white px-6 py-3 text-[10px] font-bold uppercase tracking-widest transition-all flex items-center gap-2 rounded-lg shadow-[0_0_20px_rgba(255,51,51,0.3)]"
           >
             <Plus className="w-4 h-4" /> New Member
@@ -119,8 +137,8 @@ const AdminMembers = () => {
                 onClick={() => setStatusFilter(f.value)}
                 className={`px-4 py-2 text-[9px] font-bold uppercase tracking-widest rounded-lg transition-all ${
                   statusFilter === f.value
-                    ? 'bg-white text-black'
-                    : 'bg-[#111] border border-white/5 text-white/50 hover:text-white hover:border-white/20'
+                    ? "bg-white text-black"
+                    : "bg-[#111] border border-white/5 text-white/50 hover:text-white hover:border-white/20"
                 }`}
               >
                 {f.label}
@@ -135,8 +153,8 @@ const AdminMembers = () => {
             {filteredMembers.length > 0 ? (
               <div className="divide-y divide-white/5">
                 {filteredMembers.map((member, i) => {
-                  const ms = getMemberMembership(member.id!);
-                  const status = getMemberStatus(member.id!);
+                  const ms = getMemberMembership(member.id);
+                  const status = getMemberStatus(member.id);
                   return (
                     <motion.div
                       key={member.id}
@@ -148,11 +166,15 @@ const AdminMembers = () => {
                     >
                       <div className="flex items-center gap-4 md:gap-6 flex-1 min-w-0">
                         <div className="w-11 h-11 rounded-full bg-white/5 flex items-center justify-center font-black text-white/40 border border-white/10 group-hover:border-gym-red/50 transition-colors flex-shrink-0">
-                          {member.name.charAt(0)}
+                          {member.full_name.charAt(0)}
                         </div>
                         <div className="min-w-0">
-                          <h3 className="font-bold text-sm uppercase tracking-wider mb-0.5 text-white/90 truncate">{member.name}</h3>
-                          <p className="text-[10px] font-mono tracking-widest text-white/40 truncate">{member.memberCode} • {member.mobile}</p>
+                          <h3 className="font-bold text-sm uppercase tracking-wider mb-0.5 text-white/90 truncate">
+                            {member.full_name}
+                          </h3>
+                          <p className="text-[10px] font-mono tracking-widest text-white/40 truncate">
+                            {member.member_code} • {member.mobile}
+                          </p>
                         </div>
                       </div>
 
@@ -163,13 +185,20 @@ const AdminMembers = () => {
                         <div className="text-right min-w-[130px]">
                           {ms ? (
                             <>
-                              <p className="font-bold text-xs uppercase tracking-wider mb-0.5">{ms.packageName}</p>
+                              <p className="font-bold text-xs uppercase tracking-wider mb-0.5">
+                                {ms.package_name}
+                              </p>
                               <p className="text-[9px] font-bold uppercase tracking-widest text-white/40">
-                                Due: <span className="text-white/70">{formatTimestamp(ms.nextDueDate)}</span>
+                                Due:{" "}
+                                <span className="text-white/70">
+                                  {formatTimestamp(ms.next_due_date)}
+                                </span>
                               </p>
                             </>
                           ) : (
-                            <p className="text-[9px] font-bold uppercase tracking-widest text-white/40">No plan</p>
+                            <p className="text-[9px] font-bold uppercase tracking-widest text-white/40">
+                              No plan
+                            </p>
                           )}
                         </div>
                       </div>
@@ -183,8 +212,19 @@ const AdminMembers = () => {
               <EmptyState
                 icon={Users}
                 title="No members found"
-                description={searchQuery ? `No results for "${searchQuery}"` : 'No members registered yet'}
-                action={!searchQuery ? { label: 'Add First Member', onClick: () => navigate('/member/register') } : undefined}
+                description={
+                  searchQuery
+                    ? `No results for "${searchQuery}"`
+                    : "No members registered yet"
+                }
+                action={
+                  !searchQuery
+                    ? {
+                        label: "Add First Member",
+                        onClick: () => navigate("/admin/members/new"),
+                      }
+                    : undefined
+                }
               />
             )}
           </div>

@@ -1,28 +1,26 @@
-import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
 import {
-  onAuthStateChanged,
-  signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
-  signOut,
-  sendPasswordResetEmail,
-  type User as FirebaseUser,
-} from 'firebase/auth';
-import { auth } from '../lib/firebase';
-import { getMemberByUid, createMember } from '../services/memberService';
-import { type Member } from '../lib/firestore-schema';
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  type ReactNode,
+} from "react";
+import { type User as SupabaseUser } from "@supabase/supabase-js";
+import { supabase } from "../lib/supabaseClient";
+import { type Profile } from "../lib/supabase-types";
 
-export type UserRole = 'admin' | 'member';
+export type UserRole = "admin" | "member";
 
 export interface AppUser {
   uid: string;
   email: string;
   role: UserRole;
-  member: Member | null;
+  member: Profile | null;
 }
 
 interface AuthContextType {
   user: AppUser | null;
-  firebaseUser: FirebaseUser | null;
+  supabaseUser: SupabaseUser | null;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
   register: (data: {
@@ -33,61 +31,136 @@ interface AuthContextType {
   }) => Promise<void>;
   logout: () => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
+  loginWithGoogle: () => Promise<void>;
+  sendPhoneOtp: (phone: string) => Promise<void>;
+  verifyPhoneOtp: (phone: string, token: string) => Promise<void>;
+  syncProfileData: (data: {
+    email?: string;
+    full_name?: string;
+    mobile?: string;
+  }) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Admin emails — configure these in your environment or Firestore settings
-const ADMIN_EMAILS = ['admin@fitzone.com'];
-
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<AppUser | null>(null);
-  const [firebaseUser, setFirebaseUser] = useState<FirebaseUser | null>(null);
+  const [supabaseUser, setSupabaseUser] = useState<SupabaseUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (fbUser) => {
-      if (fbUser) {
-        setFirebaseUser(fbUser);
-        try {
-          // Fetch member profile from Firestore
-          const member = await getMemberByUid(fbUser.uid);
-          const role: UserRole = member?.role === 'admin' || ADMIN_EMAILS.includes(fbUser.email || '')
-            ? 'admin'
-            : 'member';
+    let mounted = true;
 
+    const handleSession = async (authSessionUser: SupabaseUser) => {
+      if (!mounted) return;
+      setSupabaseUser(authSessionUser);
+
+      try {
+        const { data: profile, error } = await supabase
+          .from("profiles")
+          .select("*")
+          .eq("id", authSessionUser.id)
+          .single();
+
+        if (error && error.code !== "PGRST116") {
+          console.error("Error fetching profile:", error);
+        }
+
+        if (mounted) {
           setUser({
-            uid: fbUser.uid,
-            email: fbUser.email || '',
-            role,
-            member,
+            uid: authSessionUser.id,
+            email: authSessionUser.email || "",
+            role: profile?.role === "admin" ? "admin" : "member",
+            member: profile || null,
           });
-        } catch (error) {
-          console.error('Error fetching member profile:', error);
-          // Still set user with basic info
+          setIsLoading(false);
+        }
+      } catch (error) {
+        console.error("Profile fetch failed:", error);
+        if (mounted) {
           setUser({
-            uid: fbUser.uid,
-            email: fbUser.email || '',
-            role: ADMIN_EMAILS.includes(fbUser.email || '') ? 'admin' : 'member',
+            uid: authSessionUser.id,
+            email: authSessionUser.email || "",
+            role: "member",
             member: null,
           });
+          setIsLoading(false);
         }
-      } else {
-        setFirebaseUser(null);
-        setUser(null);
       }
-      setIsLoading(false);
+    };
+
+    const initializeAuth = async () => {
+      try {
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
+        if (session?.user) {
+          await handleSession(session.user);
+        } else if (mounted) {
+          const isOauthError =
+            window.location.search.includes("error=") ||
+            window.location.hash.includes("error=");
+          if (isOauthError) {
+            console.error("OAuth Error detected in URL");
+            alert(
+              "Google Login Failed. Please check your Supabase Provider settings (Client Secret).",
+            );
+            setSupabaseUser(null);
+            setUser(null);
+            setIsLoading(false);
+          } else {
+            // We wait for INITIAL_SESSION or SIGNED_IN
+          }
+        }
+      } catch (error) {
+        console.error("Session error:", error);
+        if (mounted) setIsLoading(false);
+      }
+    };
+
+    initializeAuth();
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (!mounted) return;
+      console.log("Auth event:", event, !!session);
+
+      if (session?.user) {
+        await handleSession(session.user);
+      } else if (event === "INITIAL_SESSION") {
+        const isOauthCallback =
+          window.location.hash.includes("access_token=") ||
+          window.location.search.includes("code=");
+        if (!isOauthCallback) {
+          setSupabaseUser(null);
+          setUser(null);
+          setIsLoading(false);
+        } else {
+          console.log(
+            "INITIAL_SESSION has null session, but OAuth callback detected. Waiting for SIGNED_IN...",
+          );
+        }
+      } else if (event === "SIGNED_OUT") {
+        setSupabaseUser(null);
+        setUser(null);
+        setIsLoading(false);
+      }
     });
 
-    return () => unsubscribe();
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   const login = async (email: string, password: string): Promise<void> => {
     setIsLoading(true);
-    try {
-      await signInWithEmailAndPassword(auth, email, password);
-      // onAuthStateChanged will handle the rest
-    } catch (error) {
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+    if (error) {
       setIsLoading(false);
       throw error;
     }
@@ -100,47 +173,132 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     password: string;
   }): Promise<void> => {
     setIsLoading(true);
-    try {
-      // 1. Create Firebase Auth account
-      const credential = await createUserWithEmailAndPassword(auth, data.email, data.password);
+    const { data: authData, error } = await supabase.auth.signUp({
+      email: data.email,
+      password: data.password,
+      options: {
+        data: {
+          full_name: data.name,
+          mobile: data.mobile,
+        },
+      },
+    });
 
-      // 2. Create Firestore member profile
-      const newMember = await createMember({
-        uid: credential.user.uid,
-        name: data.name,
-        email: data.email,
-        mobile: data.mobile,
-      });
-
-      // Fix Race condition: explicitly set the user state immediately
-      // so we don't have to wait for onAuthStateChanged to fetch the newly created doc.
-      setUser({
-        uid: credential.user.uid,
-        email: credential.user.email,
-        role: 'member',
-        member: newMember,
-      });
-    } catch (error) {
+    if (error) {
       setIsLoading(false);
       throw error;
+    }
+
+    // Unset loading if no session is returned immediately (e.g. email confirmation required)
+    if (!authData.session) {
+      setIsLoading(false);
     }
   };
 
   const logout = async (): Promise<void> => {
-    try {
-      await signOut(auth);
-    } catch (error) {
-      console.error('Error signing out:', error);
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      console.error("Error signing out:", error);
       throw error;
     }
   };
 
   const resetPassword = async (email: string): Promise<void> => {
-    await sendPasswordResetEmail(auth, email);
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+    if (error) throw error;
+  };
+  const loginWithGoogle = async (): Promise<void> => {
+    setIsLoading(true);
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: `${window.location.origin}/member/dashboard`,
+      },
+    });
+    if (error) {
+      setIsLoading(false);
+      throw error;
+    }
+  };
+
+  const sendPhoneOtp = async (phone: string): Promise<void> => {
+    const { error } = await supabase.auth.signInWithOtp({ phone });
+    if (error) throw error;
+  };
+
+  const verifyPhoneOtp = async (
+    phone: string,
+    token: string,
+  ): Promise<void> => {
+    setIsLoading(true);
+    const { error } = await supabase.auth.verifyOtp({
+      phone,
+      token,
+      type: "sms",
+    });
+    if (error) {
+      setIsLoading(false);
+      throw error;
+    }
+  };
+
+  const syncProfileData = async (data: {
+    email?: string;
+    full_name?: string;
+    mobile?: string;
+  }): Promise<void> => {
+    if (!user || !user.uid) return;
+
+    // 1. Update Auth email if provided
+    if (data.email && data.email !== user.email) {
+      const { error: authError } = await supabase.auth.updateUser({
+        email: data.email,
+      });
+      if (authError) throw authError;
+    }
+
+    // 2. Update Profile table
+    const { error: profileError } = await supabase
+      .from("profiles")
+      .update(data)
+      .eq("id", user.uid);
+
+    if (profileError) throw profileError;
+
+    // Re-fetch profile to sync local state
+    const { data: updatedProfile } = await supabase
+      .from("profiles")
+      .select("*")
+      .eq("id", user.uid)
+      .single();
+
+    if (updatedProfile) {
+      setUser((prev) =>
+        prev
+          ? { ...prev, member: updatedProfile, email: data.email || prev.email }
+          : null,
+      );
+    }
   };
 
   return (
-    <AuthContext.Provider value={{ user, firebaseUser, isLoading, login, register, logout, resetPassword }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        supabaseUser,
+        isLoading,
+        login,
+        register,
+        logout,
+        resetPassword,
+        loginWithGoogle,
+        sendPhoneOtp,
+        verifyPhoneOtp,
+        syncProfileData,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
@@ -149,7 +307,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 };

@@ -1,11 +1,11 @@
-import { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { ArrowRight, Check, ChevronLeft, Loader2 } from 'lucide-react';
-import { motion } from 'framer-motion';
-import { useAuth } from '../../context/AuthContext';
-import { getActivePackages } from '../../services/packageService';
-import { type Package } from '../../lib/firestore-schema';
-import { formatCurrency } from '../../utils/dateUtils';
+import { useState, useEffect } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import { ArrowRight, Check, ChevronLeft, Loader2 } from "lucide-react";
+import { motion } from "framer-motion";
+import { useAuth } from "../../context/AuthContext";
+import { getActivePackages } from "../../services/packageService";
+import { type Package } from "../../lib/supabase-types";
+import { formatCurrency } from "../../utils/dateUtils";
 
 const PackageSelection = () => {
   const [packages, setPackages] = useState<Package[]>([]);
@@ -25,18 +25,18 @@ const PackageSelection = () => {
       const pkgs = await getActivePackages();
       setPackages(pkgs);
       // Auto-select the popular one or first
-      const popular = pkgs.find(p => p.popular);
+      const popular = pkgs.find((p) => p.popular);
       if (popular?.id) setSelectedId(popular.id);
       else if (pkgs[0]?.id) setSelectedId(pkgs[0].id);
     } catch (error) {
-      console.error('Failed to load packages:', error);
-      setError('Failed to load packages. Please try again.');
+      console.error("Failed to load packages:", error);
+      setError("Failed to load packages. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
-  const selectedPackage = packages.find(p => p.id === selectedId);
+  const selectedPackage = packages.find((p) => p.id === selectedId);
 
   const handleSelect = () => {
     if (!selectedId) return;
@@ -48,9 +48,14 @@ const PackageSelection = () => {
       <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
       <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-gym-red/5 rounded-full mix-blend-screen filter blur-[200px] opacity-40 pointer-events-none"></div>
 
-      <Link to="/member/dashboard" className="absolute top-8 left-8 text-white/50 hover:text-white flex items-center gap-2 transition-colors z-20">
+      <Link
+        to="/member/dashboard"
+        className="absolute top-8 left-8 text-white/50 hover:text-white flex items-center gap-2 transition-colors z-20"
+      >
         <ChevronLeft className="w-5 h-5" />
-        <span className="font-bold tracking-widest text-sm uppercase">Back</span>
+        <span className="font-bold tracking-widest text-sm uppercase">
+          Back
+        </span>
       </Link>
 
       <div className="max-w-4xl mx-auto relative z-10">
@@ -60,23 +65,38 @@ const PackageSelection = () => {
           className="text-center mb-16"
         >
           <div className="inline-block bg-white p-2 rounded-sm shadow-[0_0_20px_rgba(255,51,51,0.2)] mb-6">
-            <img src="/logo.jpg" alt="FIT ZONE" className="h-10 w-auto object-contain" />
+            <img
+              src="/logo.jpg"
+              alt="FIT ZONE"
+              className="h-10 w-auto object-contain"
+            />
           </div>
           <h1 className="text-4xl md:text-5xl font-black uppercase tracking-tighter mb-3">
-            {user?.member ? 'Renew' : 'Welcome to'} <span className="text-gym-red">FIT ZONE</span>
+            {user?.member ? "Renew" : "Welcome to"}{" "}
+            <span className="text-gym-red">FIT ZONE</span>
           </h1>
-          <p className="text-white/60 mt-4 max-w-lg mx-auto">Select a membership package to begin your fitness journey.</p>
+          <p className="text-white/60 mt-4 max-w-lg mx-auto">
+            Select a membership package to begin your fitness journey.
+          </p>
         </motion.div>
 
         {loading ? (
           <div className="flex flex-col items-center justify-center py-20">
             <Loader2 className="w-10 h-10 text-gym-red animate-spin mb-4" />
-            <p className="text-white/50 text-sm tracking-widest uppercase">Loading packages...</p>
+            <p className="text-white/50 text-sm tracking-widest uppercase">
+              Loading packages...
+            </p>
           </div>
         ) : error ? (
           <div className="text-center py-20">
             <p className="text-red-500 mb-6">{error}</p>
-            <button onClick={() => { setLoading(true); loadPackages(); }} className="bg-gym-red hover:bg-red-600 text-white px-8 py-3 text-xs font-bold uppercase tracking-widest transition-colors inline-flex items-center gap-2">
+            <button
+              onClick={() => {
+                setLoading(true);
+                loadPackages();
+              }}
+              className="bg-gym-red hover:bg-red-600 text-white px-8 py-3 text-xs font-bold uppercase tracking-widest transition-colors inline-flex items-center gap-2"
+            >
               Retry
             </button>
           </div>
@@ -92,8 +112,8 @@ const PackageSelection = () => {
                   onClick={() => setSelectedId(pkg.id!)}
                   className={`relative p-8 rounded-sm cursor-pointer transition-all duration-300 hover:-translate-y-2 flex flex-col group ${
                     selectedId === pkg.id
-                      ? 'bg-[#0a0a0a] border-2 border-gym-red shadow-[0_0_30px_rgba(255,51,51,0.15)]'
-                      : 'bg-[#0a0a0a] border-2 border-white/10 hover:border-white/30'
+                      ? "bg-[#0a0a0a] border-2 border-gym-red shadow-[0_0_30px_rgba(255,51,51,0.15)]"
+                      : "bg-[#0a0a0a] border-2 border-white/10 hover:border-white/30"
                   }`}
                 >
                   {pkg.popular && (
@@ -114,22 +134,39 @@ const PackageSelection = () => {
 
                   <div className="flex items-start justify-center gap-1 mb-2">
                     <span className="text-xl font-bold mt-1">₹</span>
-                    <span className="text-5xl font-black">{pkg.price.toLocaleString('en-IN')}</span>
+                    <span className="text-5xl font-black">
+                      {pkg.price.toLocaleString("en-IN")}
+                    </span>
                   </div>
 
                   <div className="h-6 mb-6 text-center">
                     {pkg.offer && (
-                      <p className="text-xs font-bold tracking-widest text-gym-red">{pkg.offer}</p>
+                      <p className="text-xs font-bold tracking-widest text-gym-red">
+                        {pkg.offer}
+                      </p>
                     )}
                   </div>
 
-                  <div className="text-center text-white/40 text-[10px] font-bold uppercase tracking-widest mb-6">
-                    {pkg.durationMonths} {pkg.durationMonths === 1 ? 'Month' : 'Months'}
+                  <div className="text-center space-y-1 mb-6">
+                    <div className="text-white/40 text-[10px] font-bold uppercase tracking-widest">
+                      {pkg.duration_months} Paid Months
+                    </div>
+                    {(pkg.free_months || 0) > 0 && (
+                      <div className="text-green-400 text-[10px] font-bold uppercase tracking-widest">
+                        + {pkg.free_months} Free Months
+                      </div>
+                    )}
+                    <div className="text-white text-[12px] font-bold uppercase tracking-widest pt-1 border-t border-white/10 mt-2 inline-block">
+                      Total: {pkg.total_months || pkg.duration_months} Months Access
+                    </div>
                   </div>
 
                   <ul className="space-y-3 flex-1">
                     {pkg.features.map((feature, fIdx) => (
-                      <li key={fIdx} className="flex items-start gap-3 text-[11px] font-medium tracking-wide text-white/70">
+                      <li
+                        key={fIdx}
+                        className="flex items-start gap-3 text-[11px] font-medium tracking-wide text-white/70"
+                      >
                         <Check className="w-4 h-4 text-gym-red shrink-0" />
                         <span>{feature}</span>
                       </li>
@@ -149,7 +186,8 @@ const PackageSelection = () => {
                   onClick={handleSelect}
                   className="bg-gym-red hover:bg-red-600 text-white px-12 py-5 text-sm font-bold uppercase tracking-widest transition-all duration-300 shadow-[0_0_30px_rgba(255,51,51,0.4)] hover:shadow-[0_0_50px_rgba(255,51,51,0.6)] inline-flex items-center gap-3"
                 >
-                  Continue with {selectedPackage.name} — {formatCurrency(selectedPackage.price)}
+                  Continue with {selectedPackage.name} —{" "}
+                  {formatCurrency(selectedPackage.price)}
                   <ArrowRight className="w-5 h-5" />
                 </button>
               </motion.div>

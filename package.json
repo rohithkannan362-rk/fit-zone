@@ -10,9 +10,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.117.1",
     "@tailwindcss/vite": "^4.3.3",
     "date-fns": "^4.4.0",
-    "firebase": "^12.19.0",
     "framer-motion": "^13.4.0",
     "jspdf": "^4.2.1",
     "jspdf-autotable": "^5.0.8",

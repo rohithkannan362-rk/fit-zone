@@ -1,177 +1,138 @@
-import {
-  collection,
-  doc,
-  getDoc,
-  getDocs,
-  setDoc,
-  updateDoc,
-  query,
-  where,
-  orderBy,
-  limit,
-  startAfter,
-  Timestamp,
-  runTransaction,
-  DocumentSnapshot,
-} from 'firebase/firestore';
-import { db } from '../lib/firebase';
-import { type Member, COLLECTIONS } from '../lib/firestore-schema';
-
-const membersRef = collection(db, COLLECTIONS.MEMBERS);
-const countersRef = collection(db, COLLECTIONS.COUNTERS);
+import { supabase } from "../lib/supabaseClient";
+import { type Profile } from "../lib/supabase-types";
 
 /**
- * Generates the next unique member code (FZ000001, FZ000002, etc.)
- * Uses a Firestore transaction to ensure atomicity.
+ * Gets a member profile by their Supabase Auth UUID.
  */
-export async function generateMemberCode(): Promise<string> {
-  const counterDoc = doc(countersRef, 'memberCode');
+export async function getMemberByUid(uid: string): Promise<Profile | null> {
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("*")
+    .eq("id", uid)
+    .single();
 
-  const newValue = await runTransaction(db, async (transaction) => {
-    const counterSnap = await transaction.get(counterDoc);
-    let current = 0;
-    if (counterSnap.exists()) {
-      current = counterSnap.data().currentValue || 0;
-    }
-    const next = current + 1;
-    transaction.set(counterDoc, { currentValue: next }, { merge: true });
-    return next;
-  });
-
-  return `FZ${String(newValue).padStart(6, '0')}`;
-}
-
-/**
- * Creates a new member profile in Firestore.
- */
-export async function createMember(data: {
-  uid: string;
-  name: string;
-  email: string;
-  mobile: string;
-}): Promise<Member> {
-  const memberCode = await generateMemberCode();
-  const now = Timestamp.now();
-
-  const member: Member = {
-    uid: data.uid,
-    memberCode,
-    name: data.name,
-    email: data.email.toLowerCase(),
-    mobile: data.mobile,
-    role: 'member',
-    status: 'active',
-    createdAt: now,
-    updatedAt: now,
-  };
-
-  // Use uid as the document ID for easy lookup
-  const memberDoc = doc(membersRef, data.uid);
-  await setDoc(memberDoc, member);
-
-  return { ...member, id: data.uid };
-}
-
-/**
- * Gets a member by their Firebase Auth UID.
- */
-export async function getMemberByUid(uid: string): Promise<Member | null> {
-  const memberDoc = doc(membersRef, uid);
-  const snap = await getDoc(memberDoc);
-  if (!snap.exists()) return null;
-  return { ...snap.data() as Member, id: snap.id };
+  if (error && error.code === "PGRST116") return null; // Not found
+  if (error) throw error;
+  return data;
 }
 
 /**
  * Gets a member by their member code (e.g., FZ000001).
  */
-export async function getMemberByCode(code: string): Promise<Member | null> {
-  const q = query(membersRef, where('memberCode', '==', code), limit(1));
-  const snap = await getDocs(q);
-  if (snap.empty) return null;
-  const docSnap = snap.docs[0];
-  return { ...docSnap.data() as Member, id: docSnap.id };
+export async function getMemberByCode(code: string): Promise<Profile | null> {
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("*")
+    .eq("member_code", code)
+    .single();
+
+  if (error && error.code === "PGRST116") return null;
+  if (error) throw error;
+  return data;
 }
 
 /**
  * Updates a member profile.
+ * Does NOT allow updating role, member_code, or status from this function.
  */
-export async function updateMember(memberId: string, data: Partial<Member>): Promise<void> {
-  const memberDoc = doc(membersRef, memberId);
-  await updateDoc(memberDoc, {
-    ...data,
-    updatedAt: Timestamp.now(),
-  });
+export async function updateMember(
+  memberId: string,
+  data: Partial<Pick<Profile, "full_name" | "email" | "mobile">>,
+): Promise<void> {
+  const { error } = await supabase
+    .from("profiles")
+    .update(data)
+    .eq("id", memberId);
+
+  if (error) throw error;
 }
 
 /**
  * Searches members by name, mobile, member code, or email.
+ * Uses PostgreSQL ilike for server-side filtering.
  */
 export async function searchMembers(
   searchQuery: string,
   filters?: { status?: string },
   pageSize: number = 50,
-  lastDoc?: DocumentSnapshot
-): Promise<{ members: Member[]; lastDoc: DocumentSnapshot | null }> {
-  let q;
-  const constraints: any[] = [];
+  page: number = 0,
+): Promise<{ members: Profile[]; total: number }> {
+  let query = supabase
+    .from("profiles")
+    .select("*", { count: "exact" })
+    .eq("role", "member")
+    .order("created_at", { ascending: false })
+    .range(page * pageSize, (page + 1) * pageSize - 1);
 
-  if (filters?.status && filters.status !== 'all') {
-    constraints.push(where('status', '==', filters.status));
+  if (filters?.status && filters.status !== "all") {
+    query = query.eq("status", filters.status);
   }
 
-  constraints.push(orderBy('createdAt', 'desc'));
-  constraints.push(limit(pageSize));
-
-  if (lastDoc) {
-    constraints.push(startAfter(lastDoc));
-  }
-
-  q = query(membersRef, ...constraints);
-  const snap = await getDocs(q);
-
-  let members = snap.docs.map(d => ({ ...d.data() as Member, id: d.id }));
-
-  // Client-side search filtering (Firestore doesn't support full-text search)
   if (searchQuery) {
-    const lowerQuery = searchQuery.toLowerCase();
-    members = members.filter(
-      m =>
-        m.name.toLowerCase().includes(lowerQuery) ||
-        m.mobile.includes(searchQuery) ||
-        m.memberCode.toLowerCase().includes(lowerQuery) ||
-        m.email.toLowerCase().includes(lowerQuery)
+    const pattern = `%${searchQuery}%`;
+    query = query.or(
+      `full_name.ilike.${pattern},mobile.ilike.${pattern},member_code.ilike.${pattern},email.ilike.${pattern}`,
     );
   }
 
-  const newLastDoc = snap.docs.length > 0 ? snap.docs[snap.docs.length - 1] : null;
-
-  return { members, lastDoc: newLastDoc };
+  const { data, error, count } = await query;
+  if (error) throw error;
+  return { members: data || [], total: count || 0 };
 }
 
 /**
  * Gets all members (for admin dashboard counts).
  */
-export async function getAllMembers(): Promise<Member[]> {
-  const q = query(membersRef, where('role', '==', 'member'), orderBy('createdAt', 'desc'));
-  const snap = await getDocs(q);
-  return snap.docs.map(d => ({ ...d.data() as Member, id: d.id }));
+export async function getAllMembers(): Promise<Profile[]> {
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("*")
+    .eq("role", "member")
+    .order("created_at", { ascending: false });
+
+  if (error) throw error;
+  return data || [];
 }
 
 /**
  * Checks if a member with the given email already exists.
  */
 export async function memberExistsByEmail(email: string): Promise<boolean> {
-  const q = query(membersRef, where('email', '==', email.toLowerCase()), limit(1));
-  const snap = await getDocs(q);
-  return !snap.empty;
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("id")
+    .eq("email", email.toLowerCase())
+    .limit(1);
+
+  if (error) throw error;
+  return (data?.length || 0) > 0;
 }
 
 /**
  * Checks if a member with the given mobile already exists.
  */
 export async function memberExistsByMobile(mobile: string): Promise<boolean> {
-  const q = query(membersRef, where('mobile', '==', mobile), limit(1));
-  const snap = await getDocs(q);
-  return !snap.empty;
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("id")
+    .eq("mobile", mobile)
+    .limit(1);
+
+  if (error) throw error;
+  return (data?.length || 0) > 0;
+}
+
+/**
+ * Admin: update member status.
+ */
+export async function updateMemberStatus(
+  memberId: string,
+  status: string,
+): Promise<void> {
+  const { error } = await supabase
+    .from("profiles")
+    .update({ status })
+    .eq("id", memberId);
+
+  if (error) throw error;
 }
