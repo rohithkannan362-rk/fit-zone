@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   MapPin,
   Phone,
@@ -21,6 +21,7 @@ import {
 import { motion, useScroll, useTransform } from "framer-motion";
 import { getActivePackages } from "../services/packageService";
 import { type Package } from "../lib/supabase-types";
+import { useAuth } from "../context/AuthContext";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 40 },
@@ -42,6 +43,18 @@ const LandingPage = () => {
   const y1 = useTransform(scrollY, [0, 1000], [0, 200]);
   const [packages, setPackages] = useState<Package[]>([]);
   const [loadingPackages, setLoadingPackages] = useState(true);
+  const { user, isLoading } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!isLoading && user) {
+      if (user.role === "admin") {
+        navigate("/admin", { replace: true });
+      } else {
+        navigate("/member/dashboard", { replace: true });
+      }
+    }
+  }, [user, isLoading, navigate]);
 
   useEffect(() => {
     const loadPackages = async () => {

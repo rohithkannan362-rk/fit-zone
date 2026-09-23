@@ -10,6 +10,7 @@ import "./index.css";
 
 // Public
 import LandingPage from "./pages/LandingPage";
+import AuthCallback from "./pages/AuthCallback";
 
 // Member
 import MemberLogin from "./pages/member/MemberLogin";
@@ -38,6 +39,7 @@ function App() {
         <Routes>
           {/* ==================== PUBLIC ==================== */}
           <Route path="/" element={<LandingPage />} />
+          <Route path="/auth/callback" element={<AuthCallback />} />
 
           {/* ==================== MEMBER AUTH ==================== */}
           <Route path="/member/login" element={<MemberLogin />} />
