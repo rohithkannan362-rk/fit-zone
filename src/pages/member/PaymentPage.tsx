@@ -85,7 +85,7 @@ const PaymentPage = () => {
 
   const getUpiIntentUrl = () => {
     if (!checkout) return "";
-    const am = checkout.amount;
+    const am = checkout.amount.toFixed(2);
     const tn = `FitZone-${checkout.payment_id}`;
     return `upi://pay?pa=${upiId}&pn=${encodeURIComponent(upiName)}&am=${am}&cu=INR&tn=${tn}`;
   };

@@ -214,8 +214,12 @@ const AdminMemberProfile = () => {
           <div className="bg-[#080808]/90 rounded-[15px] p-8 flex flex-col md:flex-row items-start md:items-center gap-6 relative overflow-hidden">
             <div className="absolute top-0 right-0 w-48 h-48 bg-gym-red/10 blur-[60px] rounded-full pointer-events-none"></div>
             <div className="w-20 h-20 rounded-full bg-gradient-to-br from-gym-red to-red-900 p-[2px] flex-shrink-0">
-              <div className="w-full h-full bg-[#0a0a0a] rounded-full flex items-center justify-center">
-                <User className="w-8 h-8 text-white/50" />
+              <div className="w-full h-full bg-[#0a0a0a] rounded-full flex items-center justify-center overflow-hidden">
+                {member.avatar_url ? (
+                  <img src={member.avatar_url} alt={member.full_name} className="w-full h-full object-cover" />
+                ) : (
+                  <User className="w-8 h-8 text-white/50" />
+                )}
               </div>
             </div>
             <div className="flex-1">

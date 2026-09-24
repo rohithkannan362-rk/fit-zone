@@ -79,7 +79,22 @@ const AdminPackages = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name || !price) return;
+    if (!name.trim()) {
+      alert("Name is required");
+      return;
+    }
+    if (durationMonths < 1) {
+      alert("Duration must be at least 1 month");
+      return;
+    }
+    if (totalMonths < 1) {
+      alert("Total months must be at least 1");
+      return;
+    }
+    if (price < 0) {
+      alert("Price cannot be negative");
+      return;
+    }
     setSaving(true);
 
     try {

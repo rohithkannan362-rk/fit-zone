@@ -1,0 +1,765 @@
+<USER_REQUEST>
+FITZONE — CRITICAL PRODUCTION BUG-FIX SPRINT
+
+We have completed the major authentication/payment architecture.
+
+Now STOP adding new features.
+
+We discovered several real production problems during mobile testing. Your job is to investigate the ROOT CAUSE of each problem, fix them properly, and then test them with Playwright.
+
+IMPORTANT:
+- Keep all existing test accounts.
+- Keep all existing test payment records.
+- Do NOT reset Supabase.
+- Do NOT delete test data.
+- Do NOT redesign the payment architecture.
+- Do NOT create unnecessary migrations.
+- Do NOT remove working functionality.
+- Do NOT assume a feature works because TypeScript/build passes.
+- Use actual browser testing.
+- Mobile is the PRIMARY target device.
+
+Existing test accounts/data MUST remain:
+
+testmember@fitzone.com
+testadmin@fitzone.com
+
+TXN_REJECT
+TXN_VERIFY
+TXN_RENEW
+
+==================================================
+BUG 1 — VERCEL REFRESH RETURNS 404
+==================================================
+
+PROBLEM:
+
+The application works when navigating normally, but refreshing a deep React Router URL on Vercel produces:
+
+404 NOT_FOUND
+"This page doesn't exist"
+
+This is visible on the mobile Vercel deployment.
+
+Example:
+
+/admin
+/member/dashboard
+/admin/members
+/member/payment
+etc.
+
+Investigate the Vercel deployment configuration.
+
+Check:
+
+- vercel.json
+- Vite configuration
+- React Router configuration
+- deployment output
+- SPA fallback configuration
+
+Because this is a React/Vite SPA, ensure Vercel correctly rewrites unknown application routes to the SPA entry point.
+
+If appropriate, implement:
+
+{
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}
+
+But FIRST inspect the existing Vercel configuration and make sure this does not conflict with:
+
+- static assets
+- public files
+- API routes
+- Supabase calls
+
+Do not blindly add duplicate configuration.
+
+TEST:
+
+Open directly:
+
+/admin
+/admin/members
+/member/dashboard
+/member/membership
+/member/payment-history
+
+Then:
+
+1. Load directly.
+2. Refresh.
+3. Navigate internally.
+4. Refresh again.
+5. Use browser Back.
+6. Use browser Forward.
+
+All must work on Vercel.
+
+Test both:
+
+Desktop
+Mobile
+
+==================================================
+BUG 2 — ADMIN MEMBERS PAGE DOES NOT SHOW CORRECT MEMBERS
+==================================================
+
+PROBLEM:
+
+After logging into the admin portal, the Members section does not show the expected member information correctly.
+
+Investigate the complete data path:
+
+Auth
+→ profiles
+→ members
+→ memberships
+→ AdminMembers.tsx
+
+Do NOT assume the problem is frontend-only.
+
+Inspect:
+
+- AdminMembers.tsx
+- AdminMemberProfile.tsx
+- memberService.ts
+- profileService.ts
+- Supabase queries
+- RLS policies
+- profile creation logic
+- Google OAuth profile creation
+- email/password profile creation
+
+Determine exactly:
+
+1. Which table represents a member?
+2. How member profiles are created?
+3. How admin retrieves members?
+4. Whether admin RLS permits reading all members.
+5. Whether Google-authenticated users receive a profiles row.
+6. Whether a newly registered member appears in Admin Members.
+
+Test using:
+
+testmember@fitzone.com
+
+And if the current Google account is a separate user, test that account as well.
+
+Expected:
+
+Admin → Members
+
+should show the actual registered members with appropriate information.
+
+At minimum:
+
+- Name
+- Email
+- Phone if available
+- Member ID/code if implemented
+- Profile picture if available
+- Membership status
+- Current plan
+- Expiry date
+
+Do NOT expose passwords, auth secrets, or service-role information.
+
+If the admin is not itself registered as a gym member, do NOT artificially insert the admin into the member list just to make it appear. Determine the intended data model first.
+
+==================================================
+BUG 3 — GOOGLE LOGIN PROFILE DATA
+==================================================
+
+Because Google OAuth is now being used, verify that a Google-authenticated user gets a proper application profile.
+
+Test:
+
+Google
+→ authentication
+→ OAuth callback
+→ profile creation/loading
+→ member dashboard
+
+Verify:
+
+- auth.users exists
+- public.profiles exists
+- correct email
+- display name
+- avatar URL if provided by Google
+- correct role
+- member dashboard loads
+
+If profiles are created by an auth trigger, inspect the trigger.
+
+If profiles are created by frontend code, inspect that flow.
+
+Fix the actual root cause.
+
+Do NOT create duplicate profiles.
+
+Do NOT create duplicate member records on every login.
+
+Repeated Google login must not create duplicate profiles.
+
+==================================================
+BUG 4 — PROFILE PICTURE
+==================================================
+
+PROBLEM:
+
+Users currently cannot properly set/change/display their profile picture.
+
+Perform a full audit of profile-image handling.
+
+Inspect:
+
+- Profile page
+- profile service
+- Supabase Storage buckets
+- Storage policies
+- profiles table
+- avatar_url/profile_image field
+- image upload component
+- image display components
+
+Determine whether the existing database already has an avatar/profile-image field.
+
+If one exists, use it.
+
+If Supabase Storage already exists for profile images, use the existing bucket.
+
+Do NOT create duplicate storage systems.
+
+Expected flow:
+
+Profile
+→ Change Profile Picture
+→ Select image
+→ Validate file
+→ Upload
+→ Save URL/path
+→ Update profile
+→ Display new image
+→ Refresh page
+→ Image remains
+
+Validation:
+
+- JPG
+- JPEG
+- PNG
+- WebP
+
+Reject:
+
+- huge files
+- unsupported file types
+
+Use a reasonable size limit.
+
+Show:
+
+- upload progress/loading
+- success state
+- error state
+- fallback avatar
+
+IMPORTANT SECURITY:
+
+Users must only be able to upload/change their own avatar.
+
+Do not make the storage bucket publicly writable.
+
+Check Storage RLS/policies.
+
+If public image URLs are used, ensure only the intended object is accessible.
+
+Test:
+
+- mobile upload
+- desktop upload
+- refresh
+- logout/login
+- Google user with Google avatar
+- user without avatar
+
+==================================================
+BUG 5 — PDF DOWNLOAD DOES NOT WORK
+==================================================
+
+PROBLEM:
+
+There are PDF/export buttons in the admin/member UI, but clicking them does not actually download a usable PDF.
+
+Find EVERY PDF/download/export button in the application.
+
+Search for:
+
+- Export PDF
+- Download PDF
+- Download
+- Receipt
+- Report
+- window.print
+- jsPDF
+- html2canvas
+- PDF libraries
+- blob downloads
+- anchor downloads
+
+For every button determine whether it:
+
+1. Actually downloads a file
+2. Opens print dialog
+3. Does nothing
+4. Throws an error
+5. Generates an empty/corrupt file
+
+Do not leave fake buttons in the UI.
+
+If PDF generation is already implemented, fix it.
+
+If the application uses client-side PDF generation, make sure it works in Chrome mobile.
+
+Test:
+
+Admin Reports → Export PDF
+
+Member → Receipt → Download/Print if available
+
+Verify:
+
+- file is generated
+- file has non-zero size
+- PDF opens
+- content is readable
+- correct member/payment data
+- correct amount
+- correct dates
+- no "undefined"
+- no blank pages
+- mobile browser works
+
+If the button is intended to print rather than download, change the label to "Print" instead of pretending it downloads a PDF.
+
+Do not introduce a large PDF backend system unless the current implementation genuinely requires it.
+
+==================================================
+BUG 6 — ₹1 TEST PACKAGE PAYMENT FAILS
+==================================================
+
+PROBLEM:
+
+A ₹1 test package was created/selected and the member attempted to pay, but the payment flow failed.
+
+This must be investigated from the browser, not guessed.
+
+Use Playwright/browser DevTools.
+
+Test:
+
+Package Selection
+→ ₹1 package
+→ Pay
+→ Payment Page
+
+Record:
+
+- browser console errors
+- network errors
+- Supabase RPC errors
+- UPI URL generated
+- payment ID
+- package ID
+- amount
+- currency
+- payment status
+
+IMPORTANT:
+
+DO NOT make a real UPI payment.
+
+Use the ₹1 package only to test checkout creation and UI behavior.
+
+Determine whether failure happens at:
+
+A. Package selection
+B. create_pending_checkout RPC
+C. Payment Page rendering
+D. UPI URL generation
+E. QR generation
+F. transaction ID submission
+G. Supabase validation
+H. package data
+I. amount formatting
+J. frontend validation
+
+Inspect the actual error.
+
+Do NOT simply increase the minimum price or disable validation to make the test pass.
+
+The system must support the configured package amount correctly if ₹1 is intentionally present for testing.
+
+If ₹1 is only a temporary testing package, do not alter the four production packages.
+
+==================================================
+BUG 7 — MOBILE-FIRST AUDIT
+==================================================
+
+The gym's members will primarily use phones.
+
+Therefore mobile is now the PRIMARY UI target.
+
+Test at:
+
+390 x 844
+412 x 915
+360 x 800
+
+Test:
+
+PUBLIC
+- Landing
+- Login
+- Signup
+- Forgot Password
+
+MEMBER
+- Dashboard
+- Package Selection
+- Payment
+- Payment Submitted
+- Membership
+- Payment History
+- Receipt
+- Profile
+- Privacy & Security
+- Help & Support
+
+ADMIN
+- Login
+- Dashboard
+- Members
+- Member Profile
+- Payments
+- Packages
+- Reminders
+- Reports
+- Settings
+
+Look for:
+
+- horizontal scrolling
+- clipped cards
+- buttons outside viewport
+- tiny text
+- oversized headers
+- tables overflowing
+- modal overflow
+- broken navigation
+- unusable forms
+- QR code sizing
+- transaction ID input problems
+- PDF buttons not accessible
+- profile image controls too small
+- BackButton placement
+- bottom navigation collisions
+- browser safe-area issues
+
+Fix real problems.
+
+Do not redesign the entire application.
+
+==================================================
+BUG 8 — TOUCH / MOBILE INTERACTION
+==================================================
+
+Test every important mobile interaction.
+
+Buttons must be easy to tap.
+
+Check:
+
+- Login
+- Google Login
+- Member Login
+- Pay
+- Submit Transaction ID
+- Verify
+- Reject
+- Back
+- Profile image upload
+- Download
+- Export
+- Search
+- Filters
+- Logout
+
+No hover-only functionality should be required on mobile.
+
+==================================================
+BUG 9 — MOBILE AUTH REDIRECT
+==================================================
+
+Test Google login on mobile.
+
+Expected:
+
+Google Login
+→ Google authentication
+→ /auth/callback
+→ session resolves
+→ profile resolves
+→ member dashboard
+
+No landing page detour.
+
+No second Member Login click.
+
+No redirect loop.
+
+Test refresh after login.
+
+==================================================
+BUG 10 — DEEP LINK + REFRESH
+==================================================
+
+On the Vercel mobile deployment test:
+
+Directly open:
+
+/member/dashboard
+/member/membership
+/member/payment-history
+/member/profile
+/admin
+/admin/members
+/admin/payments
+/admin/reports
+
+Then refresh each page.
+
+None should produce Vercel 404.
+
+==================================================
+BUG 11 — CONSOLE AND NETWORK AUDIT
+==================================================
+
+For every major page collect:
+
+- console.error
+- pageerror
+- failed requests
+- 400+
+- 500+
+- Supabase errors
+- failed images
+- failed fonts
+- failed PDF generation
+- auth errors
+
+Classify:
+
+CRITICAL
+HIGH
+MEDIUM
+LOW
+
+Ignore expected 401/403 responses from deliberate authorization tests.
+
+==================================================
+BUG 12 — DATA REFRESH / STALE STATE
+==================================================
+
+Test:
+
+Login
+→ dashboard
+→ modify/verify/reject something
+→ navigate away
+→ return
+→ refresh
+
+Verify the UI reflects current Supabase state.
+
+Especially test:
+
+- payment status
+- membership status
+- current membership
+- upcoming membership
+- profile picture
+- member profile
+
+No stale state after refresh.
+
+==================================================
+BUG 13 — AUTHORIZATION
+==================================================
+
+Test with member account:
+
+Attempt:
+
+/admin
+/admin/members
+/admin/payments
+/admin/packages
+/admin/reports
+/admin/settings
+
+Expected:
+
+Member is denied/redirected.
+
+Then test admin:
+
+Admin can access admin routes.
+
+Verify RLS still protects data.
+
+Do not bypass RLS for convenience.
+
+==================================================
+BUG 14 — FINAL AUTOMATED REGRESSION
+==================================================
+
+After fixing all discovered problems:
+
+Run complete Playwright suite again.
+
+Then:
+
+npm run build
+npm run lint
+
+Do not stop after the first successful test.
+
+==================================================
+REQUIRED OUTPUT
+==================================================
+
+Create a detailed bug report:
+
+BUG-001
+Severity:
+Page:
+Device:
+Steps:
+Expected:
+Actual:
+Root cause:
+Fix:
+Retest:
+
+Repeat for every issue.
+
+Then provide:
+
+### CRITICAL
+number found / fixed
+
+### HIGH
+number found / fixed
+
+### MEDIUM
+number found / fixed
+
+### LOW
+number found / fixed
+
+### FINAL TEST MATRIX
+
+Vercel desktop:
+PASS/FAIL
+
+Vercel mobile:
+PASS/FAIL
+
+Google OAuth:
+PASS/FAIL
+
+Email/password:
+PASS/FAIL
+
+Member dashboard:
+PASS/FAIL
+
+Admin dashboard:
+PASS/FAIL
+
+Admin Members:
+PASS/FAIL
+
+Profile picture:
+PASS/FAIL
+
+PDF export:
+PASS/FAIL
+
+UPI checkout:
+PASS/FAIL
+
+₹1 test checkout:
+PASS/FAIL
+
+Payment submission:
+PASS/FAIL
+
+Admin verification:
+PASS/FAIL
+
+Admin rejection:
+PASS/FAIL
+
+Current/upcoming membership:
+PASS/FAIL
+
+Deep-link refresh:
+PASS/FAIL
+
+Authorization:
+PASS/FAIL
+
+Console errors:
+number
+
+Network errors:
+number
+
+Build:
+PASS/FAIL
+
+Lint:
+PASS/FAIL
+
+IMPORTANT:
+Do not declare the app production-ready just because the build passes.
+
+Find the actual problems, fix them, and retest.
+
+Keep all existing test accounts and test transactions.
+DO NOT clean them up yet.
+</USER_REQUEST>
+<ADDITIONAL_METADATA>
+The current local time is: 2026-09-24T12:57:22+05:30.
+
+The user's current state is as follows:
+Other open documents:
+- c:\Users\Asus\OneDrive\Desktop\fitzone\src\services\paymentService.ts (LANGUAGE_TYPESCRIPT)
+- c:\Users\Asus\OneDrive\Desktop\fitzone\src\services\packageService.ts (LANGUAGE_TYPESCRIPT)
+- c:\Users\Asus\OneDrive\Desktop\fitzone\supabase\migrations\20260924000006_manual_upi_flow.sql (LANGUAGE_UNSPECIFIED)
+- c:\Users\Asus\OneDrive\Desktop\fitzone\supabase\migrations\20260923000005_update_auth_trigger.sql (LANGUAGE_UNSPECIFIED)
+- c:\Users\Asus\OneDrive\Desktop\fitzone\src\pages\member\PackageSelection.tsx (LANGUAGE_TSX)
+</ADDITIONAL_METADATA>
+<USER_SETTINGS_CHANGE>
+The user changed setting `Model Selection` from None to Gemini 3.1 Pro (High). No need to comment on this change if the user doesn't ask about it. If reporting what model you are, please use a human readable name instead of the exact string.
+</USER_SETTINGS_CHANGE>

@@ -127,7 +127,7 @@ const AdminReminders = () => {
                   {pausedMemberships.map((ms) => (
                     <div
                       key={ms.id}
-                      className="p-5 flex items-center justify-between hover:bg-[#111] transition-colors"
+                      className="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-[#111] transition-colors"
                     >
                       <div className="flex items-center gap-4">
                         <PauseCircle className="w-5 h-5 text-blue-500" />
@@ -175,7 +175,7 @@ const AdminReminders = () => {
                     <Link
                       key={ms.id}
                       to={`/admin/members/${ms.member_id}`}
-                      className="p-5 flex items-center justify-between hover:bg-[#111] transition-colors block"
+                      className="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-[#111] transition-colors"
                     >
                       <div className="flex items-center gap-4">
                         <Clock className="w-5 h-5 text-white/30" />

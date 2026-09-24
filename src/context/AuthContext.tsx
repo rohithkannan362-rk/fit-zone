@@ -56,14 +56,26 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setSupabaseUser(authSessionUser);
 
       try {
-        const { data: profile, error } = await supabase
-          .from("profiles")
-          .select("*")
-          .eq("id", authSessionUser.id)
-          .single();
+        let profile = null;
+        let retries = 3;
+        while (retries > 0) {
+          const { data, error } = await supabase
+            .from("profiles")
+            .select("*")
+            .eq("id", authSessionUser.id)
+            .single();
 
-        if (error && error.code !== "PGRST116") {
-          console.error("Error fetching profile:", error);
+          if (!error) {
+            profile = data;
+            break;
+          }
+          if (error.code !== "PGRST116") {
+            console.error("Error fetching profile:", error);
+            break;
+          }
+          // Wait and retry if profile not found (trigger delay)
+          retries--;
+          if (retries > 0) await new Promise((r) => setTimeout(r, 1000));
         }
 
         if (mounted) {
@@ -131,7 +143,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       } else if (event === "INITIAL_SESSION") {
         const isOauthCallback =
           window.location.hash.includes("access_token=") ||
-          window.location.search.includes("code=");
+          window.location.search.includes("code=") ||
+          window.location.pathname.includes("/auth/callback");
         if (!isOauthCallback) {
           setSupabaseUser(null);
           setUser(null);

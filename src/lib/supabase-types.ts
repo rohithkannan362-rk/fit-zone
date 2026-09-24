@@ -15,6 +15,7 @@ export interface Profile {
   mobile: string;
   role: "member" | "admin";
   status: string;
+  avatar_url: string | null;
   created_at: string;
   updated_at: string;
 }

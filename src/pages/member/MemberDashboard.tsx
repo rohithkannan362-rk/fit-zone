@@ -4,6 +4,7 @@ import { useAuth } from "../../context/AuthContext";
 import { getCurrentMembership, getUpcomingMembership } from "../../services/membershipService";
 import { getMemberPayments } from "../../services/paymentService";
 import { type Membership, type Payment } from "../../lib/supabase-types";
+import { supabase } from "../../lib/supabase";
 import {
   formatTimestamp,
   formatCurrency,
@@ -27,6 +28,8 @@ import {
   Info,
   Settings,
   Download,
+  Upload,
+  Loader2,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -39,6 +42,7 @@ const MemberDashboard = () => {
   const [payments, setPayments] = useState<Payment[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
 
   useEffect(() => {
     if (user?.uid) loadData();
@@ -78,6 +82,62 @@ const MemberDashboard = () => {
   const handleLogout = async () => {
     await logout();
     navigate("/");
+  };
+
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    try {
+      setUploadingAvatar(true);
+      
+      if (!e.target.files || e.target.files.length === 0) {
+        throw new Error('You must select an image to upload.');
+      }
+
+      const file = e.target.files[0];
+      
+      // Basic validation
+      const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
+      if (!validTypes.includes(file.type)) {
+        throw new Error('Only JPG, PNG and WebP images are allowed.');
+      }
+      
+      if (file.size > 5 * 1024 * 1024) {
+        throw new Error('Image size should be less than 5MB.');
+      }
+
+      const fileExt = file.name.split('.').pop();
+      const filePath = `${user!.uid}-${Math.random()}.${fileExt}`;
+
+      // Upload to Supabase Storage
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(filePath, file, { upsert: true });
+
+      if (uploadError) {
+        throw uploadError;
+      }
+
+      // Get public URL
+      const { data } = supabase.storage.from('avatars').getPublicUrl(filePath);
+      const publicUrl = data.publicUrl;
+
+      // Update profiles table
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({ avatar_url: publicUrl })
+        .eq('id', user!.uid);
+
+      if (updateError) {
+        throw updateError;
+      }
+
+      // Force reload page to refresh user context
+      window.location.reload();
+      
+    } catch (error: any) {
+      alert(error.message || 'Error uploading avatar!');
+    } finally {
+      setUploadingAvatar(false);
+    }
   };
 
   const renderMembershipCard = (mem: Membership, title: string, isUpcoming = false) => {
@@ -626,9 +686,29 @@ const MemberDashboard = () => {
               >
                 <div className="bg-[#080808]/90 backdrop-blur-xl rounded-[15px] p-8 relative overflow-hidden shadow-2xl flex items-center gap-6">
                   <div className="absolute top-0 right-0 w-32 h-32 bg-gym-red/20 blur-[50px] rounded-full pointer-events-none"></div>
-                  <div className="w-20 h-20 rounded-full bg-gradient-to-br from-gym-red to-red-900 p-[2px] shadow-[0_0_20px_rgba(255,51,51,0.4)] flex-shrink-0">
-                    <div className="w-full h-full bg-[#0a0a0a] rounded-full flex items-center justify-center overflow-hidden">
-                      <User className="w-8 h-8 text-white/50" />
+                  <div className="relative">
+                    <div className="w-20 h-20 rounded-full bg-gradient-to-br from-gym-red to-red-900 p-[2px] shadow-[0_0_20px_rgba(255,51,51,0.4)] flex-shrink-0 group">
+                      <div className="w-full h-full bg-[#0a0a0a] rounded-full flex items-center justify-center overflow-hidden relative">
+                        {user?.member?.avatar_url ? (
+                          <img src={user.member.avatar_url} alt={memberName} className="w-full h-full object-cover group-hover:opacity-50 transition-opacity" />
+                        ) : (
+                          <User className="w-8 h-8 text-white/50 group-hover:opacity-50 transition-opacity" />
+                        )}
+                        <label className="absolute inset-0 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 cursor-pointer bg-black/40 transition-opacity">
+                          {uploadingAvatar ? (
+                            <Loader2 className="w-5 h-5 text-white animate-spin" />
+                          ) : (
+                            <Upload className="w-5 h-5 text-white" />
+                          )}
+                          <input 
+                            type="file" 
+                            accept="image/jpeg,image/png,image/webp" 
+                            className="hidden" 
+                            onChange={handleAvatarUpload}
+                            disabled={uploadingAvatar}
+                          />
+                        </label>
+                      </div>
                     </div>
                   </div>
                   <div>

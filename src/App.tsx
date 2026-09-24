@@ -20,6 +20,7 @@ import MemberDashboard from "./pages/member/MemberDashboard";
 import PackageSelection from "./pages/member/PackageSelection";
 import PaymentPage from "./pages/member/PaymentPage";
 import PaymentSuccess from "./pages/member/PaymentSuccess";
+import MemberReceipt from "./pages/member/MemberReceipt";
 
 // Admin
 import AdminDashboard from "./pages/admin/AdminDashboard";
@@ -97,6 +98,14 @@ function App() {
             element={
               <ProtectedRoute allowedRoles={["member"]}>
                 <PaymentSuccess />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/member/receipt/:id"
+            element={
+              <ProtectedRoute allowedRoles={["member"]}>
+                <MemberReceipt />
               </ProtectedRoute>
             }
           />

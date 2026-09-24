@@ -168,11 +168,11 @@ const AdminMembers = () => {
                         <div className="w-11 h-11 rounded-full bg-white/5 flex items-center justify-center font-black text-white/40 border border-white/10 group-hover:border-gym-red/50 transition-colors flex-shrink-0">
                           {member.full_name.charAt(0)}
                         </div>
-                        <div className="min-w-0">
-                          <h3 className="font-bold text-sm uppercase tracking-wider mb-0.5 text-white/90 truncate">
+                        <div className="min-w-0 flex-1">
+                          <h3 className="font-bold text-sm uppercase tracking-wider mb-0.5 text-white/90 break-words whitespace-normal">
                             {member.full_name}
                           </h3>
-                          <p className="text-[10px] font-mono tracking-widest text-white/40 truncate">
+                          <p className="text-[10px] font-mono tracking-widest text-white/40 break-words whitespace-normal">
                             {member.member_code} • {member.mobile}
                           </p>
                         </div>
