@@ -32,6 +32,7 @@ import AdminPackages from "./pages/admin/AdminPackages";
 import AdminReminders from "./pages/admin/AdminReminders";
 import AdminReports from "./pages/admin/AdminReports";
 import AdminSettings from "./pages/admin/AdminSettings";
+import AdminProfile from "./pages/admin/AdminProfile";
 
 function App() {
   return (
@@ -183,6 +184,14 @@ function App() {
             element={
               <ProtectedRoute allowedRoles={["admin"]}>
                 <AdminSettings />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/profile"
+            element={
+              <ProtectedRoute allowedRoles={["admin"]}>
+                <AdminProfile />
               </ProtectedRoute>
             }
           />

@@ -30,11 +30,12 @@ import {
   AlertTriangle,
   Clock,
   PauseCircle,
+  User,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const AdminDashboard = () => {
-  const { logout } = useAuth();
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [members, setMembers] = useState<Profile[]>([]);
@@ -189,6 +190,12 @@ const AdminDashboard = () => {
     },
     { id: "reports", icon: FileText, label: "Reports", path: "/admin/reports" },
     {
+      id: "profile",
+      icon: User,
+      label: "My Profile",
+      path: "/admin/profile",
+    },
+    {
       id: "settings",
       icon: Settings,
       label: "Settings",
@@ -296,18 +303,47 @@ const AdminDashboard = () => {
                       System Online
                     </p>
                   </div>
-                  <div className="bg-[#0a0a0a] border border-white/10 px-4 py-2 rounded-lg flex items-center gap-3 shadow-2xl">
-                    <div className="text-right">
-                      <p className="text-[9px] text-white/40 font-bold uppercase tracking-widest">
-                        Today
-                      </p>
-                      <p className="text-xs font-bold uppercase tracking-wider">
-                        {new Date().toLocaleDateString("en-US", {
-                          weekday: "long",
-                          month: "short",
-                          day: "numeric",
-                        })}
-                      </p>
+                  <div className="flex flex-wrap items-center gap-3">
+                    <Link
+                      to="/admin/profile"
+                      data-testid="admin-profile-header-link"
+                      className="bg-[#0a0a0a] hover:bg-[#141414] border border-white/10 hover:border-gym-red/40 px-3 py-2 rounded-xl flex items-center gap-3 shadow-2xl transition-all group min-h-[44px]"
+                      title="View Administrator Profile"
+                    >
+                      <div className="w-8 h-8 rounded-full bg-gym-red/20 border border-gym-red/40 flex items-center justify-center overflow-hidden shrink-0">
+                        {user?.member?.avatar_url ? (
+                          <img
+                            src={user.member.avatar_url}
+                            alt="Admin"
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <User className="w-4 h-4 text-gym-red" />
+                        )}
+                      </div>
+                      <div className="text-left">
+                        <p className="text-xs font-bold text-white group-hover:text-gym-red transition-colors">
+                          {user?.member?.full_name || "Admin"}
+                        </p>
+                        <p className="text-[9px] text-white/40 font-mono font-bold uppercase tracking-wider">
+                          {user?.member?.member_code || "ADMIN"}
+                        </p>
+                      </div>
+                    </Link>
+
+                    <div className="bg-[#0a0a0a] border border-white/10 px-4 py-2 rounded-xl flex items-center gap-3 shadow-2xl min-h-[44px]">
+                      <div className="text-right">
+                        <p className="text-[9px] text-white/40 font-bold uppercase tracking-widest">
+                          Today
+                        </p>
+                        <p className="text-xs font-bold uppercase tracking-wider">
+                          {new Date().toLocaleDateString("en-US", {
+                            weekday: "long",
+                            month: "short",
+                            day: "numeric",
+                          })}
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </motion.div>

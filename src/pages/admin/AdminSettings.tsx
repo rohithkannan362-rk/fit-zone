@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { Settings, Save, Loader2, CheckCircle2 } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Settings, Save, Loader2, CheckCircle2, User, ArrowRight } from "lucide-react";
 import { getSettings, saveSettings } from "../../services/settingsService";
 import { seedDefaultPackages } from "../../services/packageService";
 import { type AppSettings } from "../../lib/supabase-types";
@@ -87,13 +88,23 @@ const AdminSettings = () => {
     <div className="min-h-screen bg-[#030303] text-white p-6 md:p-12">
       <div className="max-w-3xl mx-auto">
         <BackButton to="/admin" label="BACK TO DASHBOARD" />
-        <div className="mb-10">
-          <h2 className="text-3xl md:text-4xl font-black uppercase tracking-tighter mb-2">
-            Admin <span className="text-gym-red">Settings</span>
-          </h2>
-          <p className="text-white/40 text-[10px] font-bold uppercase tracking-[0.2em]">
-            Configure gym settings
-          </p>
+        <div className="mb-8 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
+          <div>
+            <h2 className="text-3xl md:text-4xl font-black uppercase tracking-tighter mb-2">
+              Admin <span className="text-gym-red">Settings</span>
+            </h2>
+            <p className="text-white/40 text-[10px] font-bold uppercase tracking-[0.2em]">
+              Configure gym & business operations
+            </p>
+          </div>
+          <Link
+            to="/admin/profile"
+            className="inline-flex items-center gap-2 bg-[#0c0c0c] hover:bg-white/10 border border-white/10 hover:border-gym-red/40 px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider text-white transition-all min-h-[44px]"
+          >
+            <User className="w-3.5 h-3.5 text-gym-red" />
+            <span>Manage My Profile</span>
+            <ArrowRight className="w-3 h-3 text-white/40" />
+          </Link>
         </div>
 
         <div className="space-y-6">
