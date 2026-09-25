@@ -16,6 +16,16 @@ export interface Profile {
   role: "member" | "admin";
   status: string;
   avatar_url: string | null;
+  gender?: string | null;
+  dob?: string | null;
+  address?: string | null;
+  emergency_contact_name?: string | null;
+  emergency_contact_phone?: string | null;
+  blood_group?: string | null;
+  fitness_goal?: string | null;
+  height_cm?: number | string | null;
+  weight_kg?: number | string | null;
+  bio?: string | null;
   created_at: string;
   updated_at: string;
 }
