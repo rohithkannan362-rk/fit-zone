@@ -1,4 +1,17 @@
 
+[auth]
+site_url = "https://fit-zone-7d3n.vercel.app"
+additional_redirect_urls = [
+  "http://localhost:5173/**",
+  "http://localhost:5173/auth/callback",
+  "https://fit-zone-7d3n.vercel.app",
+  "https://fit-zone-7d3n.vercel.app/**",
+  "https://fit-zone-7d3n.vercel.app/auth/callback",
+  "https://fit-zone-7d3n-rohithkannan362-rks-projects.vercel.app/**",
+  "https://fit-zone-7d3n-rohithkannan362-rks-projects.vercel.app/auth/callback",
+  "https://fit-*-zone-7d3n-rohithkannan362-rks-projects.vercel.app/**"
+]
+
 [functions.create-payment-order]
 enabled = true
 verify_jwt = false

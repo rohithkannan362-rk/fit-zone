@@ -4,7 +4,7 @@ import { Loader2 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 
 const AuthCallback = () => {
-  const { user, isLoading, logout } = useAuth();
+  const { user, isLoading } = useAuth();
   const navigate = useNavigate();
   const [error, setError] = useState<string | null>(null);
 
@@ -23,23 +23,32 @@ const AuthCallback = () => {
       // If AuthContext has finished loading
       if (!isLoading) {
         if (user) {
-          // Profile is resolved, redirect correctly
+          // Profile is resolved, redirect correctly according to role
           if (user.role === "admin") {
-            await logout();
-            setError("Access denied: Admin accounts cannot sign in through Member Login. Please use the Admin Portal.");
-            return;
+            navigate("/admin", { replace: true });
           } else {
             navigate("/member/dashboard", { replace: true });
           }
         } else {
           // Done loading but no user found
-          setError("Authentication failed or session expired.");
+          setError("Authentication failed or session expired. Please try signing in again.");
         }
       }
     };
 
     handleAuth();
-  }, [user, isLoading, navigate, logout]);
+  }, [user, isLoading, navigate]);
+
+  // Safety fallback: if auth takes longer than 12 seconds, display actionable message
+  useEffect(() => {
+    if (!isLoading || user || error) return;
+    const timer = setTimeout(() => {
+      if (isLoading && !user) {
+        setError("Authentication took too long to resolve. Please return to login and try again.");
+      }
+    }, 12000);
+    return () => clearTimeout(timer);
+  }, [isLoading, user, error]);
 
   return (
     <div className="min-h-screen bg-[#030303] flex items-center justify-center p-6">
@@ -65,12 +74,20 @@ const AuthCallback = () => {
                 </Link>
               )}
             </div>
-            <button
-              onClick={() => navigate("/")}
-              className="text-white/50 hover:text-white text-xs font-bold uppercase tracking-widest transition-colors"
-            >
-              Return Home
-            </button>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
+              <Link
+                to="/member/login"
+                className="bg-gym-red hover:bg-white hover:text-black text-white px-5 py-2.5 rounded text-xs font-bold uppercase tracking-widest transition-all w-full sm:w-auto"
+              >
+                Back to Login
+              </Link>
+              <button
+                onClick={() => navigate("/")}
+                className="text-white/50 hover:text-white text-xs font-bold uppercase tracking-widest transition-colors px-4 py-2.5 w-full sm:w-auto"
+              >
+                Return Home
+              </button>
+            </div>
           </div>
         ) : (
           <div className="flex flex-col items-center gap-4">

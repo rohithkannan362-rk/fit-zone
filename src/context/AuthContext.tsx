@@ -8,6 +8,10 @@ import {
 import { type User as SupabaseUser } from "@supabase/supabase-js";
 import { supabase } from "../lib/supabaseClient";
 import { type Profile } from "../lib/supabase-types";
+import {
+  getOAuthCallbackUrl,
+  getPasswordResetCallbackUrl,
+} from "../utils/authUtils";
 
 export type UserRole = "admin" | "member";
 
@@ -279,17 +283,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const resetPassword = async (email: string): Promise<void> => {
+    const redirectTo = getPasswordResetCallbackUrl();
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/reset-password`,
+      redirectTo,
     });
     if (error) throw error;
   };
+
   const loginWithGoogle = async (): Promise<void> => {
     setIsLoading(true);
+    const redirectTo = getOAuthCallbackUrl();
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
+        redirectTo,
       },
     });
     if (error) {
