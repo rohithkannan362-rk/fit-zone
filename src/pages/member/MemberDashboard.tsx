@@ -299,7 +299,7 @@ const MemberDashboard = () => {
     return (
       <motion.div variants={itemVariants} className="group relative mb-6">
         <div className={`bg-gradient-to-br ${isUpcoming ? 'from-blue-500/30' : 'from-gym-red/30'} to-transparent rounded-2xl p-[1px] transition-all duration-500 hover:from-${isUpcoming ? 'blue-500' : 'gym-red'}`}>
-          <div className="bg-[#080808]/90 backdrop-blur-2xl border-none rounded-[15px] p-8 w-full relative overflow-hidden flex flex-col justify-between">
+          <div className="bg-[#080808]/90 backdrop-blur-2xl border-none rounded-[15px] p-5 sm:p-8 w-full relative overflow-hidden flex flex-col justify-between">
             <div className={`absolute top-0 right-0 w-48 h-48 ${isUpcoming ? 'bg-blue-500/10' : 'bg-gym-red/10'} blur-[50px] rounded-full group-hover:bg-${isUpcoming ? 'blue-500/20' : 'gym-red/20'} transition-colors duration-500`}></div>
 
             <div className="flex justify-between items-start mb-8 relative z-10">
@@ -385,12 +385,12 @@ const MemberDashboard = () => {
       </div>
 
       {/* Navigation */}
-      <nav className="fixed bottom-0 left-0 w-full md:w-28 md:h-screen md:top-0 bg-[#080808]/90 backdrop-blur-2xl border-t md:border-t-0 md:border-r border-white/5 z-50 flex md:flex-col items-center justify-around md:justify-start md:pt-10 md:gap-8 px-2 py-4 md:p-0 shadow-2xl">
-        <div className="hidden md:flex bg-white p-2 rounded-lg shadow-[0_0_20px_rgba(255,51,51,0.2)] mb-8">
+      <nav className="fixed bottom-0 left-0 w-full md:w-28 md:h-screen md:top-0 bg-[#080808]/90 backdrop-blur-2xl border-t md:border-t-0 md:border-r border-white/5 z-50 flex md:flex-col items-center justify-around md:justify-start md:pt-10 md:gap-8 px-2 py-2.5 sm:py-3 md:p-0 shadow-2xl">
+        <div className="hidden md:flex bg-white w-12 h-12 rounded-full items-center justify-center p-1.5 shadow-[0_0_20px_rgba(255,51,51,0.25)] border border-white/20 mb-8 overflow-hidden">
           <img
             src="/logo.jpg"
             alt="FIT ZONE"
-            className="h-8 w-auto object-contain"
+            className="w-full h-full object-contain rounded-full"
           />
         </div>
         {[
@@ -424,11 +424,11 @@ const MemberDashboard = () => {
       {/* Mobile Header */}
       <header className="md:hidden bg-[#080808]/90 backdrop-blur-md border-b border-white/5 sticky top-0 z-40">
         <div className="px-6 py-4 flex items-center gap-3">
-          <div className="bg-white p-1.5 rounded-md shadow-lg">
+          <div className="bg-white w-8 h-8 rounded-full flex items-center justify-center p-1 shadow-lg border border-white/20 overflow-hidden">
             <img
               src="/logo.jpg"
               alt="FIT ZONE"
-              className="h-5 w-auto object-contain"
+              className="w-full h-full object-contain rounded-full"
             />
           </div>
           <span className="font-black text-sm tracking-widest uppercase block leading-none">
@@ -454,7 +454,7 @@ const MemberDashboard = () => {
                   <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse shadow-[0_0_10px_rgba(34,197,94,0.5)]"></span>
                   Hello, {memberName} 👋
                 </p>
-                <h1 className="text-4xl font-black uppercase tracking-tighter">
+                <h1 className="text-2xl sm:text-3xl md:text-4xl font-black uppercase tracking-tighter">
                   Welcome to <span className="text-gym-red">FIT ZONE</span>
                 </h1>
                 {memberCode && (
@@ -533,7 +533,7 @@ const MemberDashboard = () => {
             >
               <motion.h2
                 variants={itemVariants}
-                className="text-4xl font-black uppercase tracking-tighter mb-10 bg-gradient-to-r from-white to-white/40 bg-clip-text text-transparent"
+                className="text-2xl sm:text-3xl md:text-4xl font-black uppercase tracking-tighter mb-6 sm:mb-10 bg-gradient-to-r from-white to-white/40 bg-clip-text text-transparent"
               >
                 My Plans
               </motion.h2>
@@ -696,7 +696,7 @@ const MemberDashboard = () => {
             >
               <motion.h2
                 variants={itemVariants}
-                className="text-4xl font-black uppercase tracking-tighter mb-10 bg-gradient-to-r from-white to-white/40 bg-clip-text text-transparent"
+                className="text-2xl sm:text-3xl md:text-4xl font-black uppercase tracking-tighter mb-6 sm:mb-10 bg-gradient-to-r from-white to-white/40 bg-clip-text text-transparent"
               >
                 Payment History
               </motion.h2>
@@ -765,7 +765,7 @@ const MemberDashboard = () => {
             >
               <motion.h2
                 variants={itemVariants}
-                className="text-4xl font-black uppercase tracking-tighter mb-10 bg-gradient-to-r from-white to-white/40 bg-clip-text text-transparent"
+                className="text-2xl sm:text-3xl md:text-4xl font-black uppercase tracking-tighter mb-6 sm:mb-10 bg-gradient-to-r from-white to-white/40 bg-clip-text text-transparent"
               >
                 Receipts
               </motion.h2>

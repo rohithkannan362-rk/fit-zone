@@ -264,7 +264,7 @@ export default function AdminAddMember() {
   // ==========================================
   if (createdMember) {
     return (
-      <div className="min-h-screen bg-[#030303] text-white py-8 sm:py-12 px-4 sm:px-6 overflow-x-hidden selection:bg-gym-red selection:text-white">
+      <div className="min-h-screen bg-[#030303] text-white py-8 sm:py-12 px-4 sm:px-6 pb-24 md:pb-12 overflow-x-hidden selection:bg-gym-red selection:text-white">
         <div className="max-w-xl mx-auto">
           <BackButton to="/admin/members" label="BACK TO MEMBERS" />
 
@@ -398,7 +398,7 @@ export default function AdminAddMember() {
   // ADD MEMBER FORM (MAIN VIEW)
   // ==========================================
   return (
-    <div className="min-h-screen bg-[#030303] text-white py-8 sm:py-12 px-4 sm:px-6 overflow-x-hidden selection:bg-gym-red selection:text-white">
+    <div className="min-h-screen bg-[#030303] text-white py-8 sm:py-12 px-4 sm:px-6 pb-24 md:pb-12 overflow-x-hidden selection:bg-gym-red selection:text-white">
       <div className="max-w-xl mx-auto">
         <BackButton to="/admin/members" label="BACK TO MEMBERS" />
 

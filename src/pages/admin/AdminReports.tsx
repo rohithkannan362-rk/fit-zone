@@ -272,11 +272,11 @@ const AdminReports = () => {
 
   return (
     <>
-      <div className="min-h-screen bg-[#030303] text-white p-6 md:p-12 print:hidden">
+      <div className="min-h-screen bg-[#030303] text-white p-4 sm:p-6 md:p-12 pb-24 md:pb-12 print:hidden">
         <div className="max-w-4xl mx-auto">
           <BackButton to="/admin" label="BACK TO DASHBOARD" />
-          <div className="mb-10">
-            <h2 className="text-3xl md:text-4xl font-black uppercase tracking-tighter mb-2">
+          <div className="mb-6 sm:mb-10">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-black uppercase tracking-tighter mb-1 sm:mb-2">
               Export <span className="text-gym-red">Reports</span>
             </h2>
             <p className="text-white/40 text-[10px] font-bold uppercase tracking-[0.2em]">
@@ -292,13 +292,13 @@ const AdminReports = () => {
                 animate={{ opacity: 1, y: 0 }}
                 className="bg-gradient-to-b from-white/[0.05] to-transparent p-[1px] rounded-2xl"
               >
-                <div className="bg-[#080808] rounded-[15px] p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-                  <div className="flex items-center gap-4">
-                    <div className="p-3 bg-white/5 rounded-xl">
+                <div className="bg-[#080808] rounded-[15px] p-4 sm:p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                  <div className="flex items-center gap-3 sm:gap-4">
+                    <div className="p-2.5 sm:p-3 bg-white/5 rounded-xl shrink-0">
                       <FileText className="w-5 h-5 text-gym-red" />
                     </div>
                     <div>
-                      <h3 className="font-bold text-sm uppercase tracking-widest mb-1">
+                      <h3 className="font-bold text-sm uppercase tracking-widest mb-0.5 sm:mb-1">
                         {report.title}
                       </h3>
                       <p className="text-[10px] text-white/40 uppercase tracking-widest">
@@ -309,7 +309,7 @@ const AdminReports = () => {
                   <button
                     onClick={report.action}
                     disabled={generating !== ""}
-                    className="bg-gym-red hover:bg-white hover:text-black text-white px-6 py-3 text-[10px] font-bold uppercase tracking-widest transition-all flex items-center gap-2 rounded-lg disabled:opacity-50"
+                    className="w-full md:w-auto justify-center bg-gym-red hover:bg-white hover:text-black text-white px-5 sm:px-6 py-3 text-[10px] font-bold uppercase tracking-widest transition-all flex items-center gap-2 rounded-lg disabled:opacity-50"
                   >
                     {generating === report.id ? (
                       <>

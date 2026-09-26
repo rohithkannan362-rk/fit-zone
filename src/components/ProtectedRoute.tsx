@@ -1,5 +1,5 @@
 import { type ReactNode } from "react";
-import { Navigate } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { Loader2 } from "lucide-react";
 
@@ -10,16 +10,17 @@ interface ProtectedRouteProps {
 
 const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
   const { user, isLoading } = useAuth();
+  const location = useLocation();
 
   if (isLoading) {
     return (
       <div className="min-h-screen bg-[#030303] flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
-          <div className="bg-white p-2 rounded-sm shadow-[0_0_20px_rgba(255,51,51,0.2)]">
+          <div className="bg-white w-14 h-14 rounded-full flex items-center justify-center p-1.5 shadow-[0_0_20px_rgba(255,51,51,0.25)] border border-white/20 overflow-hidden">
             <img
               src="/logo.jpg"
               alt="FIT ZONE"
-              className="h-10 w-auto object-contain"
+              className="w-full h-full object-contain rounded-full"
             />
           </div>
           <Loader2 className="w-6 h-6 text-gym-red animate-spin" />
@@ -34,7 +35,7 @@ const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
   if (!user) {
     console.log(
       "ProtectedRoute: User is null and isLoading is false. Redirecting to login. Current path:",
-      window.location.pathname,
+      location.pathname,
       "Hash:",
       window.location.hash,
     );
@@ -47,7 +48,7 @@ const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
       );
     }
     // Determine redirect based on the route context
-    const isAdminRoute = window.location.pathname.startsWith("/admin");
+    const isAdminRoute = location.pathname.startsWith("/admin");
     return (
       <Navigate to={isAdminRoute ? "/admin/login" : "/member/login"} replace />
     );

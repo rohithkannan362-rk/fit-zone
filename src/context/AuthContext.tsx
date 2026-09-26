@@ -22,7 +22,11 @@ interface AuthContextType {
   user: AppUser | null;
   supabaseUser: SupabaseUser | null;
   isLoading: boolean;
-  login: (email: string, password: string) => Promise<void>;
+  login: (
+    email: string,
+    password: string,
+    expectedRole?: UserRole,
+  ) => Promise<void>;
   register: (data: {
     name: string;
     email: string;
@@ -196,15 +200,44 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     };
   }, []);
 
-  const login = async (email: string, password: string): Promise<void> => {
+  const login = async (
+    email: string,
+    password: string,
+    expectedRole?: UserRole,
+  ): Promise<void> => {
     setIsLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({
+    const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
     if (error) {
       setIsLoading(false);
       throw error;
+    }
+
+    if (expectedRole && data.user) {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", data.user.id)
+        .single();
+
+      const userRole: UserRole = profile?.role === "admin" ? "admin" : "member";
+      if (userRole !== expectedRole) {
+        await supabase.auth.signOut();
+        setSupabaseUser(null);
+        setUser(null);
+        setIsLoading(false);
+        if (expectedRole === "member") {
+          throw new Error(
+            "Access denied: Admin accounts cannot sign in through Member Login. Please use the Admin Portal.",
+          );
+        } else {
+          throw new Error(
+            "Access denied: Member accounts cannot sign in through the Admin Portal.",
+          );
+        }
+      }
     }
   };
 

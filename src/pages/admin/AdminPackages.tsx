@@ -140,12 +140,12 @@ const AdminPackages = () => {
   if (loading) return <LoadingSpinner message="Loading packages..." />;
 
   return (
-    <div className="min-h-screen bg-[#030303] text-white p-6 md:p-12">
+    <div className="min-h-screen bg-[#030303] text-white p-4 sm:p-6 md:p-12 pb-24 md:pb-12">
       <div className="max-w-4xl mx-auto">
         <BackButton to="/admin" label="BACK TO DASHBOARD" />
-        <div className="flex justify-between items-end mb-10">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 mb-6 sm:mb-10">
           <div>
-            <h2 className="text-3xl md:text-4xl font-black uppercase tracking-tighter mb-2">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-black uppercase tracking-tighter mb-1 sm:mb-2">
               Manage <span className="text-gym-red">Packages</span>
             </h2>
             <p className="text-white/40 text-[10px] font-bold uppercase tracking-[0.2em]">
@@ -157,7 +157,7 @@ const AdminPackages = () => {
               resetForm();
               setShowForm(true);
             }}
-            className="bg-gym-red hover:bg-white hover:text-black text-white px-6 py-3 text-[10px] font-bold uppercase tracking-widest transition-all flex items-center gap-2 rounded-lg"
+            className="w-full sm:w-auto justify-center bg-gym-red hover:bg-white hover:text-black text-white px-5 sm:px-6 py-3 text-[10px] font-bold uppercase tracking-widest transition-all flex items-center gap-2 rounded-lg"
           >
             <Plus className="w-4 h-4" /> New Package
           </button>
@@ -174,7 +174,7 @@ const AdminPackages = () => {
             >
               <form
                 onSubmit={handleSubmit}
-                className="bg-[#080808] rounded-[15px] p-8 space-y-5"
+                className="bg-[#080808] rounded-[15px] p-4 sm:p-6 md:p-8 space-y-4 sm:space-y-5"
               >
                 <div className="flex justify-between items-center mb-4">
                   <h3 className="text-sm font-black uppercase tracking-widest">
@@ -189,7 +189,7 @@ const AdminPackages = () => {
                   </button>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-[10px] font-bold uppercase tracking-widest text-white/60 mb-2">
                       Name
@@ -218,7 +218,7 @@ const AdminPackages = () => {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-[10px] font-bold uppercase tracking-widest text-white/60 mb-2">
                       Free Months
@@ -251,7 +251,7 @@ const AdminPackages = () => {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-[10px] font-bold uppercase tracking-widest text-white/60 mb-2">
                       Price (₹)
@@ -331,13 +331,13 @@ const AdminPackages = () => {
               layout
               className={`bg-gradient-to-b from-white/[0.05] to-transparent p-[1px] rounded-2xl ${!pkg.active ? "opacity-50" : ""}`}
             >
-              <div className="bg-[#080808] rounded-[15px] p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-                <div className="flex items-center gap-4">
-                  <div className="p-3 bg-white/5 rounded-xl">
+              <div className="bg-[#080808] rounded-[15px] p-4 sm:p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                <div className="flex items-center gap-3 sm:gap-4">
+                  <div className="p-2.5 sm:p-3 bg-white/5 rounded-xl shrink-0">
                     <PackageIcon className="w-5 h-5 text-gym-red" />
                   </div>
                   <div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 flex-wrap">
                       <h3 className="font-bold text-sm uppercase tracking-widest">
                         {pkg.name}
                       </h3>
@@ -361,26 +361,30 @@ const AdminPackages = () => {
                   </div>
                 </div>
 
-                <div className="flex items-center gap-4">
-                  <span className="text-2xl font-black">
+                <div className="w-full md:w-auto flex items-center justify-between md:justify-end gap-4 border-t md:border-t-0 border-white/5 pt-3 md:pt-0 mt-1 md:mt-0">
+                  <span className="text-xl sm:text-2xl font-black">
                     {formatCurrency(pkg.price)}
                   </span>
-                  <button
-                    onClick={() => openEdit(pkg)}
-                    className="px-3 py-2 bg-white/5 hover:bg-white/10 rounded-lg transition-colors"
-                  >
-                    <Edit3 className="w-4 h-4 text-white/50" />
-                  </button>
-                  <button
-                    onClick={() => handleToggleActive(pkg)}
-                    className="px-3 py-2 bg-white/5 hover:bg-white/10 rounded-lg transition-colors"
-                  >
-                    {pkg.active ? (
-                      <ToggleRight className="w-5 h-5 text-green-500" />
-                    ) : (
-                      <ToggleLeft className="w-5 h-5 text-white/40" />
-                    )}
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => openEdit(pkg)}
+                      className="px-3 py-2 bg-white/5 hover:bg-white/10 rounded-lg transition-colors"
+                      title="Edit package"
+                    >
+                      <Edit3 className="w-4 h-4 text-white/50" />
+                    </button>
+                    <button
+                      onClick={() => handleToggleActive(pkg)}
+                      className="px-3 py-2 bg-white/5 hover:bg-white/10 rounded-lg transition-colors"
+                      title={pkg.active ? "Deactivate" : "Activate"}
+                    >
+                      {pkg.active ? (
+                        <ToggleRight className="w-5 h-5 text-green-500" />
+                      ) : (
+                        <ToggleLeft className="w-5 h-5 text-white/40" />
+                      )}
+                    </button>
+                  </div>
                 </div>
               </div>
             </motion.div>

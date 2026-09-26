@@ -74,13 +74,13 @@ const AdminPayments = () => {
   if (loading) return <LoadingSpinner message="Loading payments..." />;
 
   return (
-    <div className="min-h-screen bg-[#030303] text-white p-6 md:p-12">
+    <div className="min-h-screen bg-[#030303] text-white p-4 sm:p-6 md:p-12 pb-24 md:pb-12">
       <div className="max-w-6xl mx-auto">
         <BackButton to="/admin" label="BACK TO DASHBOARD" />
 
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 mb-10">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 mb-6 sm:mb-10">
           <div>
-            <h2 className="text-3xl md:text-4xl font-black uppercase tracking-tighter mb-2">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-black uppercase tracking-tighter mb-1 sm:mb-2">
               Monitor <span className="text-gym-red">Payments</span>
             </h2>
             <p className="text-white/40 text-[10px] font-bold uppercase tracking-[0.2em]">
@@ -90,12 +90,12 @@ const AdminPayments = () => {
         </div>
 
         {/* Filters */}
-        <div className="flex flex-wrap gap-3 mb-8">
+        <div className="flex flex-wrap gap-2 sm:gap-3 mb-6 sm:mb-8">
           {["all", "submitted", "verified", "rejected", "pending"].map((f) => (
             <button
               key={f}
               onClick={() => setFilter(f)}
-              className={`px-5 py-2.5 text-[9px] font-bold uppercase tracking-widest rounded-lg transition-all ${
+              className={`px-3.5 sm:px-5 py-2 sm:py-2.5 text-[9px] font-bold uppercase tracking-widest rounded-lg transition-all ${
                 filter === f
                   ? "bg-white text-black shadow-[0_0_15px_rgba(255,255,255,0.3)]"
                   : "bg-[#0a0a0a] border border-white/5 text-white/50 hover:text-white hover:border-white/20"
@@ -125,11 +125,10 @@ const AdminPayments = () => {
                     initial={{ opacity: 0, x: -10 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: Math.min(i * 0.05, 0.5) }}
-                    className="grid grid-cols-1 md:grid-cols-6 gap-4 p-5 items-center hover:bg-[#111] transition-colors"
+                    className="grid grid-cols-1 md:grid-cols-6 gap-3 sm:gap-4 p-4 sm:p-5 items-center hover:bg-[#111] transition-colors"
                   >
                     <div className="col-span-1 md:col-span-2">
                       <h3 className="font-bold text-xs uppercase tracking-wider text-white">
-                        {/* If we had member name joined, it would go here. Using package for now */}
                         {payment.package_name}
                       </h3>
                       <p className="text-[10px] text-white/40 font-mono">
@@ -137,12 +136,12 @@ const AdminPayments = () => {
                       </p>
                     </div>
                     <div>
-                      <p className="font-black text-lg text-white/90">
+                      <p className="font-black text-base sm:text-lg text-white/90">
                         {formatCurrency(payment.amount)}
                       </p>
                     </div>
                     <div>
-                      <div className="flex flex-col items-start gap-2">
+                      <div className="flex flex-col items-start gap-1.5 sm:gap-2">
                         <StatusBadge status={payment.status} />
                         {payment.status === 'rejected' && payment.rejection_reason && (
                           <span className="text-[9px] text-red-500 max-w-[200px] break-words line-clamp-2">
@@ -152,35 +151,37 @@ const AdminPayments = () => {
                       </div>
                     </div>
                     <div>
-                      <p className="text-xs font-bold tracking-wider">
+                      <p className="text-xs font-bold tracking-wider text-white/70">
                         {formatTimestamp(
                           payment.payment_date || payment.created_at,
                           "dd MMM yyyy, hh:mm a"
                         )}
                       </p>
                     </div>
-                    <div className="flex justify-end gap-2">
+                    <div className="flex justify-start md:justify-end gap-2 pt-2 md:pt-0 border-t md:border-t-0 border-white/5">
                       {payment.status === "submitted" && (
                         <>
                           <button
                             onClick={() => handleVerify(payment.id)}
                             disabled={processingId === payment.id}
-                            className="bg-green-500/10 hover:bg-green-500/20 text-green-500 border border-green-500/30 p-2 rounded transition-colors disabled:opacity-50"
+                            className="bg-green-500/10 hover:bg-green-500/20 text-green-500 border border-green-500/30 px-3 py-1.5 sm:p-2 rounded text-xs font-bold flex items-center gap-1.5 transition-colors disabled:opacity-50"
                             title="Verify Payment"
                           >
                             {processingId === payment.id ? (
-                              <Loader2 className="w-5 h-5 animate-spin" />
+                              <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spin" />
                             ) : (
-                              <CheckCircle2 className="w-5 h-5" />
+                              <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5" />
                             )}
+                            <span className="md:hidden">Verify</span>
                           </button>
                           <button
                             onClick={() => handleReject(payment.id)}
                             disabled={processingId === payment.id}
-                            className="bg-red-500/10 hover:bg-red-500/20 text-red-500 border border-red-500/30 p-2 rounded transition-colors disabled:opacity-50"
+                            className="bg-red-500/10 hover:bg-red-500/20 text-red-500 border border-red-500/30 px-3 py-1.5 sm:p-2 rounded text-xs font-bold flex items-center gap-1.5 transition-colors disabled:opacity-50"
                             title="Reject Payment"
                           >
-                            <XCircle className="w-5 h-5" />
+                            <XCircle className="w-4 h-4 sm:w-5 sm:h-5" />
+                            <span className="md:hidden">Reject</span>
                           </button>
                         </>
                       )}

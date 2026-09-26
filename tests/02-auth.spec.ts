@@ -63,4 +63,29 @@ test.describe('Phase 4 - Authentication', () => {
     await page.click('text=Sign Out');
     await expect(page).toHaveURL(/\//); 
   });
+
+  test('Member Login - admin credentials rejected', async ({ page }) => {
+    await page.goto('/member/login');
+    await page.fill('input[type="email"]', 'testadmin@fitzone.com');
+    await page.fill('input[type="password"]', 'password123');
+    await page.click('button[type="submit"]');
+
+    // Should display access denied error
+    await expect(page.locator('text=Admin accounts cannot sign in through Member Login')).toBeVisible();
+    // Must NOT navigate to /admin
+    await expect(page).toHaveURL(/\/member\/login/);
+  });
+
+  test('Admin Login - member credentials rejected', async ({ page, isMobile }) => {
+    if (isMobile) test.skip();
+    await page.goto('/admin/login');
+    await page.fill('input[type="email"]', 'testmember@fitzone.com');
+    await page.fill('input[type="password"]', 'password123');
+    await page.click('button[type="submit"]');
+
+    // Should display access denied error
+    await expect(page.locator('text=Member accounts cannot sign in through the Admin Portal')).toBeVisible();
+    // Must NOT navigate to admin dashboard or member dashboard
+    await expect(page).toHaveURL(/\/admin\/login/);
+  });
 });

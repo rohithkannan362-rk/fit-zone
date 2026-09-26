@@ -25,32 +25,49 @@ const MemberLogin = ({ isAdmin = false }: MemberLoginProps) => {
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [resetSent, setResetSent] = useState(false);
 
-  const { login, resetPassword, user, isLoading, loginWithGoogle } = useAuth();
+  const { login, resetPassword, user, isLoading, loginWithGoogle, logout } =
+    useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
     if (user && !isLoading) {
       console.log(
-        "MemberLogin: User found, checking profile completion...",
+        "MemberLogin: User found, checking role and profile completion...",
         user,
       );
-      if (
-        !user.member?.email ||
-        !user.member?.mobile ||
-        !user.member?.full_name
-      ) {
-        console.log(
-          "MemberLogin: Profile incomplete, redirecting to complete-profile",
-        );
-        navigate("/member/complete-profile");
-      } else if (user.role === "admin") {
+      if (isAdmin) {
+        if (user.role !== "admin") {
+          logout();
+          setError(
+            "Access denied: Member accounts cannot sign in through the Admin Portal.",
+          );
+          return;
+        }
         navigate("/admin");
       } else {
-        console.log("MemberLogin: Profile complete, redirecting to dashboard");
-        navigate("/member/dashboard");
+        if (user.role === "admin") {
+          logout();
+          setError(
+            "Access denied: Admin accounts cannot sign in through Member Login. Please use the Admin Portal.",
+          );
+          return;
+        }
+        if (
+          !user.member?.email ||
+          !user.member?.mobile ||
+          !user.member?.full_name
+        ) {
+          console.log(
+            "MemberLogin: Profile incomplete, redirecting to complete-profile",
+          );
+          navigate("/member/complete-profile");
+        } else {
+          console.log("MemberLogin: Profile complete, redirecting to dashboard");
+          navigate("/member/dashboard");
+        }
       }
     }
-  }, [user, isLoading, navigate]);
+  }, [user, isLoading, isAdmin, navigate, logout]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -67,7 +84,11 @@ const MemberLogin = ({ isAdmin = false }: MemberLoginProps) => {
 
     setIsSubmitting(true);
     try {
-      await login(email.trim().toLowerCase(), password);
+      await login(
+        email.trim().toLowerCase(),
+        password,
+        isAdmin ? "admin" : "member",
+      );
     } catch (err: any) {
       console.error("Login error:", err);
       if (
@@ -122,16 +143,16 @@ const MemberLogin = ({ isAdmin = false }: MemberLoginProps) => {
   };
 
   return (
-    <div className="min-h-screen bg-gym-black flex flex-col items-center justify-center p-6 relative overflow-hidden">
+    <div className="min-h-screen bg-gym-black flex flex-col items-center justify-center p-4 sm:p-6 relative overflow-hidden">
       <div className="absolute inset-0 bg-grid-pattern opacity-10"></div>
       <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-gym-red rounded-full mix-blend-screen filter blur-[200px] opacity-10 pointer-events-none"></div>
 
       <Link
         to="/"
-        className="absolute top-8 left-8 text-white/50 hover:text-white flex items-center gap-2 transition-colors z-20"
+        className="absolute top-4 left-4 sm:top-8 sm:left-8 text-white/50 hover:text-white flex items-center gap-2 transition-colors z-20"
       >
         <ChevronLeft className="w-5 h-5" />
-        <span className="font-bold tracking-widest text-sm uppercase">
+        <span className="font-bold tracking-widest text-xs sm:text-sm uppercase">
           Return
         </span>
       </Link>
@@ -140,17 +161,17 @@ const MemberLogin = ({ isAdmin = false }: MemberLoginProps) => {
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.5 }}
-        className="glass-card w-full max-w-md p-10 relative z-10 border-t-4 border-t-gym-red"
+        className="glass-card w-full max-w-md p-6 sm:p-10 relative z-10 border-t-4 border-t-gym-red"
       >
-        <div className="flex flex-col items-center mb-8 text-center">
-          <div className="mb-6 bg-white p-3 rounded-lg shadow-2xl transform -rotate-2">
+        <div className="flex flex-col items-center mb-6 sm:mb-8 text-center">
+          <div className="mb-4 sm:mb-6 bg-white w-16 h-16 sm:w-20 sm:h-20 rounded-full flex items-center justify-center p-2 shadow-2xl overflow-hidden border-2 border-white/20">
             <img
               src="/logo.jpg"
               alt="FIT ZONE"
-              className="h-14 w-auto object-contain"
+              className="w-full h-full object-contain rounded-full"
             />
           </div>
-          <h2 className="text-3xl font-black text-white font-heading uppercase tracking-tighter">
+          <h2 className="text-2xl sm:text-3xl font-black text-white font-heading uppercase tracking-tighter">
             {isAdmin ? (
               <>
                 Admin <span className="text-gym-red">Portal</span>
@@ -161,14 +182,30 @@ const MemberLogin = ({ isAdmin = false }: MemberLoginProps) => {
               </>
             )}
           </h2>
-          <p className="text-white/50 text-sm mt-3 tracking-wider uppercase font-medium">
+          <p className="text-white/50 text-xs sm:text-sm mt-2 sm:mt-3 tracking-wider uppercase font-medium">
             {isAdmin ? "Gym Owner Access Only" : "Member Login"}
           </p>
         </div>
 
         {error && (
-          <div className="bg-gym-red/10 border border-gym-red/30 text-gym-red text-sm p-4 text-center font-bold tracking-wider uppercase mb-6">
-            {error}
+          <div className="bg-gym-red/10 border border-gym-red/30 text-gym-red text-sm p-4 text-center font-bold tracking-wider uppercase mb-6 flex flex-col items-center gap-2">
+            <span>{error}</span>
+            {!isAdmin && (error.includes("Admin Portal") || error.includes("Admin accounts")) && (
+              <Link
+                to="/admin/login"
+                className="text-xs text-white underline hover:text-gym-red tracking-widest uppercase transition-colors"
+              >
+                Go to Admin Login &rarr;
+              </Link>
+            )}
+            {isAdmin && (error.includes("Member accounts") || error.includes("Member Login")) && (
+              <Link
+                to="/member/login"
+                className="text-xs text-white underline hover:text-gym-red tracking-widest uppercase transition-colors"
+              >
+                Go to Member Login &rarr;
+              </Link>
+            )}
           </div>
         )}
 
@@ -216,38 +253,38 @@ const MemberLogin = ({ isAdmin = false }: MemberLoginProps) => {
           <div className="flex flex-col gap-5">
             <form onSubmit={handleLogin} className="flex flex-col gap-5">
               <div className="relative">
-                <span className="absolute left-5 top-1/2 -translate-y-1/2 text-white/40">
-                  <Mail className="w-5 h-5" />
+                <span className="absolute left-4 sm:left-5 top-1/2 -translate-y-1/2 text-white/40">
+                  <Mail className="w-4 h-4 sm:w-5 sm:h-5" />
                 </span>
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="EMAIL ADDRESS"
-                  className="w-full bg-gym-charcoal border-2 border-white/10 py-4 pl-14 pr-5 text-white font-bold tracking-widest focus:outline-none focus:border-gym-red transition-colors placeholder:text-white/20 lowercase"
+                  className="w-full bg-gym-charcoal border-2 border-white/10 py-3 sm:py-4 pl-11 sm:pl-14 pr-4 sm:pr-5 text-white font-bold tracking-widest text-sm sm:text-base focus:outline-none focus:border-gym-red transition-colors placeholder:text-white/20 lowercase"
                 />
               </div>
 
               <div className="relative">
-                <span className="absolute left-5 top-1/2 -translate-y-1/2 text-white/40">
-                  <Lock className="w-5 h-5" />
+                <span className="absolute left-4 sm:left-5 top-1/2 -translate-y-1/2 text-white/40">
+                  <Lock className="w-4 h-4 sm:w-5 sm:h-5" />
                 </span>
                 <input
                   type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="PASSWORD"
-                  className="w-full bg-gym-charcoal border-2 border-white/10 py-4 pl-14 pr-14 text-white font-bold tracking-widest focus:outline-none focus:border-gym-red transition-colors placeholder:text-white/20 uppercase"
+                  className="w-full bg-gym-charcoal border-2 border-white/10 py-3 sm:py-4 pl-11 sm:pl-14 pr-11 sm:pr-14 text-white font-bold tracking-widest text-sm sm:text-base focus:outline-none focus:border-gym-red transition-colors placeholder:text-white/20 uppercase"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-5 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60 transition-colors"
+                  className="absolute right-4 sm:right-5 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60 transition-colors"
                 >
                   {showPassword ? (
-                    <EyeOff className="w-5 h-5" />
+                    <EyeOff className="w-4 h-4 sm:w-5 sm:h-5" />
                   ) : (
-                    <Eye className="w-5 h-5" />
+                    <Eye className="w-4 h-4 sm:w-5 sm:h-5" />
                   )}
                 </button>
               </div>
@@ -268,21 +305,21 @@ const MemberLogin = ({ isAdmin = false }: MemberLoginProps) => {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="btn-primary w-full flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="btn-primary w-full py-3.5 sm:py-4 text-xs sm:text-sm flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isSubmitting ? (
-                  <Loader2 className="w-5 h-5 animate-spin" />
+                  <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spin" />
                 ) : null}
                 {isSubmitting ? "Signing In..." : "Sign In"}
-                {!isSubmitting && <ArrowRight className="w-5 h-5" />}
+                {!isSubmitting && <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5" />}
               </button>
             </form>
 
             {!isAdmin && (
               <>
-                <div className="relative flex items-center py-4">
+                <div className="relative flex items-center py-3 sm:py-4">
                   <div className="flex-grow border-t border-white/10"></div>
-                  <span className="flex-shrink-0 mx-4 text-white/40 text-xs font-bold tracking-widest uppercase">
+                  <span className="flex-shrink-0 mx-4 text-white/40 text-[10px] sm:text-xs font-bold tracking-widest uppercase">
                     OR
                   </span>
                   <div className="flex-grow border-t border-white/10"></div>
@@ -292,7 +329,7 @@ const MemberLogin = ({ isAdmin = false }: MemberLoginProps) => {
                   type="button"
                   onClick={handleGoogleLogin}
                   disabled={isSubmitting}
-                  className="w-full bg-white text-gym-black border-2 border-white py-4 font-black tracking-widest hover:bg-gray-200 hover:border-gray-200 transition-colors uppercase flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full bg-white text-gym-black border-2 border-white py-3 sm:py-4 text-xs sm:text-sm font-black tracking-widest hover:bg-gray-200 hover:border-gray-200 transition-colors uppercase flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <svg className="w-5 h-5" viewBox="0 0 24 24">
                     <path

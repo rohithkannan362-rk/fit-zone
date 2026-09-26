@@ -31,6 +31,8 @@ import {
   Clock,
   PauseCircle,
   User,
+  Menu,
+  X,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -43,6 +45,7 @@ const AdminDashboard = () => {
   const [payments, setPayments] = useState<Payment[]>([]);
   const [totalRevenue, setTotalRevenue] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   // Determine active tab from URL
   const getActiveTab = () => {
@@ -149,8 +152,13 @@ const AdminDashboard = () => {
   ];
 
   const handleLogout = async () => {
-    await logout();
-    navigate("/");
+    try {
+      await logout();
+    } catch (err) {
+      console.error("Logout error:", err);
+    } finally {
+      navigate("/admin/login");
+    }
   };
 
   const containerVariants = {
@@ -204,7 +212,7 @@ const AdminDashboard = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-[#030303] text-white flex overflow-hidden selection:bg-gym-red selection:text-white font-sans relative">
+    <div className="min-h-screen bg-[#030303] text-white flex flex-col md:flex-row overflow-hidden selection:bg-gym-red selection:text-white font-sans relative">
       <div className="fixed inset-0 pointer-events-none z-0">
         <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-gym-red/5 rounded-full mix-blend-screen filter blur-[150px] opacity-50"></div>
       </div>
@@ -218,11 +226,11 @@ const AdminDashboard = () => {
       >
         <div className="p-8 border-b border-white/5 flex items-center gap-4 relative overflow-hidden">
           <div className="absolute top-0 right-0 w-32 h-32 bg-gym-red/10 blur-3xl rounded-full"></div>
-          <div className="bg-white p-1.5 rounded-sm shadow-[0_0_15px_rgba(255,51,51,0.2)]">
+          <div className="bg-white w-10 h-10 rounded-full flex items-center justify-center p-1 shadow-[0_0_15px_rgba(255,51,51,0.25)] border border-white/20 overflow-hidden flex-shrink-0">
             <img
               src="/logo.jpg"
               alt="FIT ZONE"
-              className="h-8 w-auto object-contain"
+              className="w-full h-full object-contain rounded-full"
             />
           </div>
           <div>
@@ -277,8 +285,97 @@ const AdminDashboard = () => {
         </div>
       </motion.aside>
 
+      {/* Mobile Top Header */}
+      <header className="md:hidden bg-[#080808]/90 backdrop-blur-xl border-b border-white/5 sticky top-0 z-40 px-4 py-3 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="bg-white w-8 h-8 rounded-full flex items-center justify-center p-1 shadow-[0_0_15px_rgba(255,51,51,0.25)] border border-white/20 overflow-hidden shrink-0">
+            <img
+              src="/logo.jpg"
+              alt="FIT ZONE"
+              className="w-full h-full object-contain rounded-full"
+            />
+          </div>
+          <span className="font-black text-sm tracking-widest uppercase block leading-none">
+            Admin<span className="text-gym-red">Zone</span>
+          </span>
+        </div>
+        <div className="flex items-center gap-2">
+          <Link
+            to="/admin/profile"
+            className="w-8 h-8 rounded-full bg-gym-red/20 border border-gym-red/40 flex items-center justify-center overflow-hidden shrink-0"
+            title="Profile"
+          >
+            {user?.member?.avatar_url ? (
+              <img
+                src={user.member.avatar_url}
+                alt="Admin"
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <User className="w-4 h-4 text-gym-red" />
+            )}
+          </Link>
+          <button
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="p-2 rounded-lg bg-white/5 border border-white/10 text-white/80 hover:text-white"
+            aria-label="Toggle menu"
+          >
+            {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          </button>
+        </div>
+      </header>
+
+      {/* Mobile Drawer */}
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.2 }}
+            className="md:hidden fixed inset-x-0 top-[57px] bg-[#0a0a0a]/95 backdrop-blur-2xl border-b border-white/10 z-50 p-6 shadow-2xl flex flex-col gap-2 max-h-[calc(100vh-60px)] overflow-y-auto"
+          >
+            <div className="grid grid-cols-2 gap-2 mb-4">
+              {navItems.map((item) => (
+                <Link
+                  key={item.id}
+                  to={item.path}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={`flex items-center gap-2.5 px-3.5 py-3 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all ${
+                    activeTab === item.id
+                      ? "bg-gym-red text-white shadow-lg"
+                      : "bg-white/5 text-white/70 hover:bg-white/10 hover:text-white border border-white/5"
+                  }`}
+                >
+                  <item.icon className="w-4 h-4" />
+                  <span className="truncate">{item.label}</span>
+                </Link>
+              ))}
+              <Link
+                to="/admin/profile"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center gap-2.5 px-3.5 py-3 rounded-lg text-[10px] font-bold uppercase tracking-wider bg-white/5 text-white/70 hover:bg-white/10 hover:text-white border border-white/5"
+              >
+                <User className="w-4 h-4" />
+                <span>Profile</span>
+              </Link>
+            </div>
+            <button
+              onClick={() => {
+                setMobileMenuOpen(false);
+                handleLogout();
+              }}
+              className="w-full flex items-center justify-center gap-2 py-3 bg-red-500/10 border border-red-500/20 text-red-400 font-bold uppercase tracking-widest text-[10px] rounded-lg transition-all"
+            >
+              <LogOut className="w-4 h-4" />
+              <span>Sign Out</span>
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Main Content */}
-      <main className="flex-1 h-screen overflow-y-auto relative z-10 p-6 md:p-12 scroll-smooth">
+      <main className="flex-1 h-screen overflow-y-auto relative z-10 p-4 sm:p-6 md:p-12 pb-24 md:pb-12 scroll-smooth">
         <div className="max-w-6xl mx-auto">
           {loading ? (
             <LoadingSpinner message="Loading admin data..." />
@@ -292,10 +389,10 @@ const AdminDashboard = () => {
               >
                 <motion.div
                   variants={itemVariants}
-                  className="mb-12 flex flex-col md:flex-row justify-between items-start md:items-end gap-4"
+                  className="mb-8 md:mb-12 flex flex-col md:flex-row justify-between items-start md:items-end gap-4"
                 >
                   <div>
-                    <h1 className="text-3xl md:text-4xl font-black uppercase tracking-tighter mb-2">
+                    <h1 className="text-2xl sm:text-3xl md:text-4xl font-black uppercase tracking-tighter mb-2">
                       FIT ZONE <span className="text-gym-red">ADMIN</span>
                     </h1>
                     <p className="text-white/40 text-[10px] font-bold uppercase tracking-[0.2em] flex items-center gap-2">
@@ -387,9 +484,9 @@ const AdminDashboard = () => {
                     to="/admin/members"
                     className="bg-gradient-to-b from-white/[0.05] to-transparent p-[1px] rounded-2xl group"
                   >
-                    <div className="bg-[#080808] rounded-[15px] p-8 flex items-center gap-6 hover:bg-[#0a0a0a] transition-colors h-full">
-                      <div className="p-4 bg-white/5 rounded-xl group-hover:bg-gym-red/10 transition-colors">
-                        <Search className="w-6 h-6 text-white/50 group-hover:text-gym-red transition-colors" />
+                    <div className="bg-[#080808] rounded-[15px] p-5 sm:p-8 flex items-center gap-4 sm:gap-6 hover:bg-[#0a0a0a] transition-colors h-full">
+                      <div className="p-3 sm:p-4 bg-white/5 rounded-xl group-hover:bg-gym-red/10 transition-colors">
+                        <Search className="w-5 h-5 sm:w-6 sm:h-6 text-white/50 group-hover:text-gym-red transition-colors" />
                       </div>
                       <div>
                         <h3 className="font-bold text-sm uppercase tracking-widest mb-1">
@@ -406,9 +503,9 @@ const AdminDashboard = () => {
                     onClick={() => navigate("/admin/members/new")}
                     className="bg-gradient-to-br from-gym-red/20 via-[#080808] to-[#080808] p-[1px] rounded-2xl group text-left"
                   >
-                    <div className="bg-[#080808]/90 rounded-[15px] p-8 flex items-center gap-6 h-full">
-                      <div className="p-4 bg-gym-red/10 rounded-xl">
-                        <Plus className="w-6 h-6 text-gym-red" />
+                    <div className="bg-[#080808]/90 rounded-[15px] p-5 sm:p-8 flex items-center gap-4 sm:gap-6 h-full">
+                      <div className="p-3 sm:p-4 bg-gym-red/10 rounded-xl">
+                        <Plus className="w-5 h-5 sm:w-6 sm:h-6 text-gym-red" />
                       </div>
                       <div>
                         <h3 className="font-bold text-sm uppercase tracking-widest mb-1">
@@ -425,9 +522,9 @@ const AdminDashboard = () => {
                     to="/admin/reports"
                     className="bg-gradient-to-b from-white/[0.05] to-transparent p-[1px] rounded-2xl group"
                   >
-                    <div className="bg-[#080808] rounded-[15px] p-8 flex items-center gap-6 hover:bg-[#0a0a0a] transition-colors h-full">
-                      <div className="p-4 bg-white/5 rounded-xl group-hover:bg-gym-red/10 transition-colors">
-                        <FileText className="w-6 h-6 text-white/50 group-hover:text-gym-red transition-colors" />
+                    <div className="bg-[#080808] rounded-[15px] p-5 sm:p-8 flex items-center gap-4 sm:gap-6 hover:bg-[#0a0a0a] transition-colors h-full">
+                      <div className="p-3 sm:p-4 bg-white/5 rounded-xl group-hover:bg-gym-red/10 transition-colors">
+                        <FileText className="w-5 h-5 sm:w-6 sm:h-6 text-white/50 group-hover:text-gym-red transition-colors" />
                       </div>
                       <div>
                         <h3 className="font-bold text-sm uppercase tracking-widest mb-1">
@@ -489,6 +586,55 @@ const AdminDashboard = () => {
           ) : null}
         </div>
       </main>
+
+      {/* Mobile Bottom Bar */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-[#080808]/95 backdrop-blur-2xl border-t border-white/10 z-40 flex items-center justify-around py-2 px-2 shadow-2xl">
+        <Link
+          to="/admin"
+          className={`flex flex-col items-center gap-1 py-1 px-3 text-[9px] font-bold uppercase tracking-wider ${
+            activeTab === "dashboard" ? "text-gym-red" : "text-white/40"
+          }`}
+        >
+          <LayoutDashboard className="w-5 h-5" />
+          <span>Home</span>
+        </Link>
+        <Link
+          to="/admin/members"
+          className={`flex flex-col items-center gap-1 py-1 px-3 text-[9px] font-bold uppercase tracking-wider ${
+            activeTab === "members" ? "text-gym-red" : "text-white/40"
+          }`}
+        >
+          <Users className="w-5 h-5" />
+          <span>Members</span>
+        </Link>
+        <Link
+          to="/admin/payments"
+          className={`flex flex-col items-center gap-1 py-1 px-3 text-[9px] font-bold uppercase tracking-wider ${
+            activeTab === "payments" ? "text-gym-red" : "text-white/40"
+          }`}
+        >
+          <IndianRupee className="w-5 h-5" />
+          <span>Payments</span>
+        </Link>
+        <Link
+          to="/admin/packages"
+          className={`flex flex-col items-center gap-1 py-1 px-3 text-[9px] font-bold uppercase tracking-wider ${
+            activeTab === "packages" ? "text-gym-red" : "text-white/40"
+          }`}
+        >
+          <Package className="w-5 h-5" />
+          <span>Plans</span>
+        </Link>
+        <button
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          className={`flex flex-col items-center gap-1 py-1 px-3 text-[9px] font-bold uppercase tracking-wider ${
+            mobileMenuOpen ? "text-gym-red" : "text-white/40"
+          }`}
+        >
+          <Menu className="w-5 h-5" />
+          <span>More</span>
+        </button>
+      </nav>
     </div>
   );
 };

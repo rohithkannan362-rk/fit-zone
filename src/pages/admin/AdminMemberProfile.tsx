@@ -152,7 +152,7 @@ const AdminMemberProfile = () => {
     return (
       <div className="space-y-6">
         <h3 className="text-sm font-black uppercase tracking-widest text-white/50">{title}</h3>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
           <div>
             <p className="text-white/40 text-[9px] font-bold uppercase tracking-[0.2em] mb-1">
               Package
@@ -201,7 +201,7 @@ const AdminMemberProfile = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#030303] text-white p-6 md:p-12">
+    <div className="min-h-screen bg-[#030303] text-white p-4 sm:p-6 md:p-12 pb-24 md:pb-12">
       <div className="max-w-4xl mx-auto">
         <BackButton to="/admin/members" label="BACK TO MEMBERS" />
 
@@ -211,7 +211,7 @@ const AdminMemberProfile = () => {
           animate={{ opacity: 1, y: 0 }}
           className="bg-gradient-to-br from-gym-red/30 to-transparent p-[1px] rounded-2xl mb-8"
         >
-          <div className="bg-[#080808]/90 rounded-[15px] p-8 flex flex-col md:flex-row items-start md:items-center gap-6 relative overflow-hidden">
+          <div className="bg-[#080808]/90 rounded-[15px] p-4 sm:p-6 md:p-8 flex flex-col md:flex-row items-start md:items-center gap-6 relative overflow-hidden">
             <div className="absolute top-0 right-0 w-48 h-48 bg-gym-red/10 blur-[60px] rounded-full pointer-events-none"></div>
             <div className="w-20 h-20 rounded-full bg-gradient-to-br from-gym-red to-red-900 p-[2px] flex-shrink-0">
               <div className="w-full h-full bg-[#0a0a0a] rounded-full flex items-center justify-center overflow-hidden">
@@ -253,7 +253,7 @@ const AdminMemberProfile = () => {
           transition={{ delay: 0.1 }}
           className="bg-gradient-to-b from-white/[0.05] to-transparent p-[1px] rounded-2xl mb-8"
         >
-          <div className="bg-[#080808] rounded-[15px] p-8">
+          <div className="bg-[#080808] rounded-[15px] p-4 sm:p-6 md:p-8">
             <h2 className="text-sm font-black uppercase tracking-widest mb-6 flex items-center gap-2 border-b border-white/5 pb-4">
               <CreditCard className="w-4 h-4 text-gym-red" /> Membership
             </h2>
@@ -270,7 +270,7 @@ const AdminMemberProfile = () => {
 
                 {/* Manual Renewal Action */}
                 <div className="border-t border-white/5 pt-6">
-                  <div className="flex justify-between items-center">
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                     <div>
                       <p className="text-sm font-bold tracking-wider">
                         Manual Renewal
@@ -281,7 +281,7 @@ const AdminMemberProfile = () => {
                     </div>
                     <button
                       onClick={() => setShowRenewModal(true)}
-                      className="bg-gym-red hover:bg-white hover:text-black text-white border border-gym-red px-4 py-2 text-[9px] font-bold uppercase tracking-widest rounded-lg transition-all"
+                      className="bg-gym-red hover:bg-white hover:text-black text-white border border-gym-red px-4 py-2 text-[9px] font-bold uppercase tracking-widest rounded-lg transition-all w-full sm:w-auto"
                     >
                       Renew Manually
                     </button>
@@ -369,7 +369,7 @@ const AdminMemberProfile = () => {
           transition={{ delay: 0.2 }}
           className="bg-gradient-to-b from-white/[0.05] to-transparent p-[1px] rounded-2xl"
         >
-          <div className="bg-[#080808] rounded-[15px] p-8">
+          <div className="bg-[#080808] rounded-[15px] p-4 sm:p-6 md:p-8">
             <h2 className="text-sm font-black uppercase tracking-widest mb-6">
               Payment History
             </h2>

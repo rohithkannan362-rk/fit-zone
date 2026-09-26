@@ -97,12 +97,12 @@ const AdminMembers = () => {
   if (loading) return <LoadingSpinner message="Loading members..." />;
 
   return (
-    <div className="min-h-screen bg-[#030303] text-white p-6 md:p-12">
+    <div className="min-h-screen bg-[#030303] text-white p-4 sm:p-6 md:p-12 pb-24 md:pb-12">
       <div className="max-w-6xl mx-auto">
         <BackButton to="/admin" label="BACK TO DASHBOARD" />
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 mb-10">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 mb-6 sm:mb-10">
           <div>
-            <h2 className="text-3xl md:text-4xl font-black uppercase tracking-tighter mb-2">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-black uppercase tracking-tighter mb-1 sm:mb-2">
               Manage <span className="text-gym-red">Members</span>
             </h2>
             <p className="text-white/40 text-[10px] font-bold uppercase tracking-[0.2em]">
@@ -111,14 +111,14 @@ const AdminMembers = () => {
           </div>
           <button
             onClick={() => navigate("/admin/members/new")}
-            className="bg-gym-red hover:bg-white hover:text-black text-white px-6 py-3 text-[10px] font-bold uppercase tracking-widest transition-all flex items-center gap-2 rounded-lg shadow-[0_0_20px_rgba(255,51,51,0.3)]"
+            className="w-full sm:w-auto justify-center bg-gym-red hover:bg-white hover:text-black text-white px-5 sm:px-6 py-3 text-[10px] font-bold uppercase tracking-widest transition-all flex items-center gap-2 rounded-lg shadow-[0_0_20px_rgba(255,51,51,0.3)]"
           >
             <Plus className="w-4 h-4" /> New Member
           </button>
         </div>
 
         {/* Search & Filters */}
-        <div className="bg-[#080808] rounded-2xl p-6 mb-6 border border-white/5">
+        <div className="bg-[#080808] rounded-2xl p-4 sm:p-6 mb-6 border border-white/5">
           <div className="relative max-w-md mb-4">
             <Search className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-white/40" />
             <input
@@ -135,7 +135,7 @@ const AdminMembers = () => {
               <button
                 key={f.value}
                 onClick={() => setStatusFilter(f.value)}
-                className={`px-4 py-2 text-[9px] font-bold uppercase tracking-widest rounded-lg transition-all ${
+                className={`px-3 sm:px-4 py-2 text-[9px] font-bold uppercase tracking-widest rounded-lg transition-all ${
                   statusFilter === f.value
                     ? "bg-white text-black"
                     : "bg-[#111] border border-white/5 text-white/50 hover:text-white hover:border-white/20"
@@ -161,11 +161,11 @@ const AdminMembers = () => {
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: Math.min(i * 0.03, 0.5) }}
-                      className="p-5 flex items-center justify-between hover:bg-[#111] transition-colors group cursor-pointer"
+                      className="p-4 sm:p-5 flex items-center justify-between hover:bg-[#111] transition-colors group cursor-pointer"
                       onClick={() => navigate(`/admin/members/${member.id}`)}
                     >
-                      <div className="flex items-center gap-4 md:gap-6 flex-1 min-w-0">
-                        <div className="w-11 h-11 rounded-full bg-white/5 flex items-center justify-center font-black text-white/40 border border-white/10 group-hover:border-gym-red/50 transition-colors flex-shrink-0">
+                      <div className="flex items-center gap-3 sm:gap-4 md:gap-6 flex-1 min-w-0">
+                        <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-white/5 flex items-center justify-center font-black text-white/40 border border-white/10 group-hover:border-gym-red/50 transition-colors flex-shrink-0">
                           {member.full_name.charAt(0)}
                         </div>
                         <div className="min-w-0 flex-1">
@@ -175,6 +175,14 @@ const AdminMembers = () => {
                           <p className="text-[10px] font-mono tracking-widest text-white/40 break-words whitespace-normal">
                             {member.member_code} • {member.mobile}
                           </p>
+                          <div className="md:hidden mt-2 flex flex-wrap items-center gap-2">
+                            <StatusBadge status={status} size="sm" />
+                            {ms && (
+                              <span className="text-[9px] text-white/50 font-bold uppercase tracking-wider">
+                                {ms.package_name}
+                              </span>
+                            )}
+                          </div>
                         </div>
                       </div>
 

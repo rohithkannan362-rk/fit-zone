@@ -177,11 +177,11 @@ const PaymentPage = () => {
     const s = statusConfig[p.status] ?? statusConfig.pending;
     const { Icon } = s;
     return (
-      <div className="min-h-screen bg-[#030303] text-white py-12 px-6 relative overflow-hidden">
+      <div className="min-h-screen bg-[#030303] text-white py-8 sm:py-12 px-4 sm:px-6 pb-24 md:pb-12 relative overflow-hidden">
         <div className="absolute inset-0 bg-grid-pattern opacity-5" />
         <div className="max-w-lg mx-auto relative z-10">
           <BackButton to="/member/dashboard" label="BACK TO DASHBOARD" />
-          <div className="glass-card p-8 border-t-4 border-t-gym-red mt-8">
+          <div className="glass-card p-5 sm:p-8 border-t-4 border-t-gym-red mt-8">
             <div className="text-center mb-6">
               <Icon className={`w-16 h-16 ${s.color} mx-auto mb-4`} />
               <h2 className="text-2xl font-black uppercase tracking-widest">
@@ -235,7 +235,7 @@ const PaymentPage = () => {
   const paymentDetails = `Pay ₹${amount.toFixed(2)} to ${upiName}\nUPI ID: ${upiId}`;
 
   return (
-    <div className="min-h-screen bg-[#030303] text-white py-8 md:py-20 px-4 md:px-6 relative overflow-hidden">
+    <div className="min-h-screen bg-[#030303] text-white py-8 sm:py-12 md:py-20 px-4 md:px-6 pb-24 md:pb-12 relative overflow-hidden">
       <div className="absolute inset-0 bg-grid-pattern opacity-5" />
       <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-gym-red/5 rounded-full mix-blend-screen filter blur-[200px] opacity-40 pointer-events-none" />
 
@@ -269,7 +269,7 @@ const PaymentPage = () => {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="glass-card p-8 border-t-4 border-t-gym-red mb-8"
+            className="glass-card p-5 sm:p-8 border-t-4 border-t-gym-red mb-8"
           >
             <h2 className="text-lg font-black uppercase tracking-widest mb-8 border-b border-white/10 pb-4 flex justify-between items-center">
               <span>{checkout.package_name}</span>
@@ -316,7 +316,7 @@ const PaymentPage = () => {
 
             <button
               onClick={() => setStep("payment")}
-              className="btn-primary w-full flex items-center justify-center gap-3 text-lg py-5"
+              className="btn-primary w-full flex items-center justify-center gap-3 text-base sm:text-lg py-4 sm:py-5"
             >
               CONTINUE TO PAYMENT
             </button>
@@ -331,23 +331,23 @@ const PaymentPage = () => {
             className="space-y-6"
           >
             {/* UPI Payment Card */}
-            <div className="glass-card p-6 md:p-8 border-t-4 border-t-gym-red">
+            <div className="glass-card p-4 sm:p-6 md:p-8 border-t-4 border-t-gym-red">
               <div className="text-center space-y-5">
                 <div>
                   <h3 className="text-xs font-bold text-white/50 uppercase tracking-widest mb-1">
                     Payable Amount
                   </h3>
-                  <div className="text-4xl font-black text-gym-red">
+                  <div className="text-3xl sm:text-4xl font-black text-gym-red">
                     {formatCurrency(amount)}
                   </div>
                 </div>
 
                 {/* QR Code */}
-                <div className="bg-white p-4 rounded-xl inline-block shadow-lg">
+                <div className="bg-white p-3 sm:p-4 rounded-xl inline-block shadow-lg">
                   <img
                     src={qrUrl}
                     alt="UPI QR Code"
-                    className="w-52 h-52 mx-auto"
+                    className="w-44 h-44 sm:w-52 sm:h-52 mx-auto"
                     loading="lazy"
                   />
                 </div>
@@ -401,7 +401,7 @@ const PaymentPage = () => {
                     onClick={() => handleOpenUpiApp(amount)}
                     aria-label="Open UPI App"
                     data-upi-url={upiUrl}
-                    className="w-full py-4 rounded font-black uppercase tracking-widest transition-all duration-300 flex items-center justify-center gap-3 bg-gradient-to-r from-gym-red to-red-700 hover:from-red-600 hover:to-red-800 text-white shadow-[0_0_20px_rgba(255,51,51,0.3)]"
+                    className="w-full py-4 rounded font-black uppercase tracking-widest transition-all duration-300 flex items-center justify-center gap-3 bg-gradient-to-r from-gym-red to-red-700 hover:from-red-600 hover:to-red-800 text-white shadow-[0_0_20px_rgba(255,51,51,0.3)] text-sm sm:text-base"
                   >
                     {isMobile ? (
                       <Smartphone className="w-5 h-5" />
@@ -442,7 +442,7 @@ const PaymentPage = () => {
             {/* Proof Submission Form */}
             <form
               onSubmit={handleSubmitProof}
-              className="glass-card p-6 md:p-8 border-t-4 border-t-blue-500"
+              className="glass-card p-4 sm:p-6 md:p-8 border-t-4 border-t-blue-500"
             >
               <div className="flex items-center gap-3 mb-2">
                 <CheckCircle2 className="w-5 h-5 text-blue-500 shrink-0" />

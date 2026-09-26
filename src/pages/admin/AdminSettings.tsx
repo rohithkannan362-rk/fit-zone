@@ -85,12 +85,12 @@ const AdminSettings = () => {
   if (loading) return <LoadingSpinner message="Loading settings..." />;
 
   return (
-    <div className="min-h-screen bg-[#030303] text-white p-6 md:p-12">
+    <div className="min-h-screen bg-[#030303] text-white p-4 sm:p-6 md:p-12 pb-24 md:pb-12">
       <div className="max-w-3xl mx-auto">
         <BackButton to="/admin" label="BACK TO DASHBOARD" />
-        <div className="mb-8 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
+        <div className="mb-6 sm:mb-8 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
           <div>
-            <h2 className="text-3xl md:text-4xl font-black uppercase tracking-tighter mb-2">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-black uppercase tracking-tighter mb-1 sm:mb-2">
               Admin <span className="text-gym-red">Settings</span>
             </h2>
             <p className="text-white/40 text-[10px] font-bold uppercase tracking-[0.2em]">
@@ -99,7 +99,7 @@ const AdminSettings = () => {
           </div>
           <Link
             to="/admin/profile"
-            className="inline-flex items-center gap-2 bg-[#0c0c0c] hover:bg-white/10 border border-white/10 hover:border-gym-red/40 px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider text-white transition-all min-h-[44px]"
+            className="w-full sm:w-auto justify-center inline-flex items-center gap-2 bg-[#0c0c0c] hover:bg-white/10 border border-white/10 hover:border-gym-red/40 px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider text-white transition-all min-h-[44px]"
           >
             <User className="w-3.5 h-3.5 text-gym-red" />
             <span>Manage My Profile</span>
@@ -114,7 +114,7 @@ const AdminSettings = () => {
             animate={{ opacity: 1, y: 0 }}
             className="bg-gradient-to-b from-white/[0.05] to-transparent p-[1px] rounded-2xl"
           >
-            <div className="bg-[#080808] rounded-[15px] p-8 space-y-5">
+            <div className="bg-[#080808] rounded-[15px] p-4 sm:p-6 md:p-8 space-y-4 sm:space-y-5">
               <h3 className="text-sm font-black uppercase tracking-widest flex items-center gap-2">
                 <Settings className="w-4 h-4 text-gym-red" /> Gym Information
               </h3>
@@ -145,7 +145,7 @@ const AdminSettings = () => {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-[10px] font-bold uppercase tracking-widest text-white/60 mb-2">
                     Phone
@@ -181,7 +181,7 @@ const AdminSettings = () => {
             transition={{ delay: 0.1 }}
             className="bg-gradient-to-b from-white/[0.05] to-transparent p-[1px] rounded-2xl"
           >
-            <div className="bg-[#080808] rounded-[15px] p-8 space-y-5">
+            <div className="bg-[#080808] rounded-[15px] p-4 sm:p-6 md:p-8 space-y-4 sm:space-y-5">
               <h3 className="text-sm font-black uppercase tracking-widest">
                 Quick Setup
               </h3>
@@ -192,7 +192,7 @@ const AdminSettings = () => {
               <button
                 onClick={handleSeedPackages}
                 disabled={seeding}
-                className="bg-white/5 hover:bg-white/10 border border-white/10 text-white px-6 py-3 text-[10px] font-bold uppercase tracking-widest transition-all flex items-center gap-2 rounded-lg disabled:opacity-50"
+                className="w-full sm:w-auto justify-center bg-white/5 hover:bg-white/10 border border-white/10 text-white px-5 sm:px-6 py-3 text-[10px] font-bold uppercase tracking-widest transition-all flex items-center gap-2 rounded-lg disabled:opacity-50"
               >
                 {seeding ? (
                   <>
@@ -206,11 +206,11 @@ const AdminSettings = () => {
           </motion.div>
 
           {/* Save Button */}
-          <div className="flex gap-4">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
             <button
               onClick={handleSave}
               disabled={saving}
-              className="btn-primary flex items-center gap-2 disabled:opacity-50"
+              className="btn-primary w-full sm:w-auto flex items-center justify-center gap-2 disabled:opacity-50 py-3.5"
             >
               {saving ? (
                 <>
@@ -229,7 +229,7 @@ const AdminSettings = () => {
                   initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0 }}
-                  className="flex items-center gap-2 text-green-500 text-[10px] font-bold uppercase tracking-widest"
+                  className="flex items-center justify-center sm:justify-start gap-2 text-green-500 text-[10px] font-bold uppercase tracking-widest"
                 >
                   <CheckCircle2 className="w-4 h-4" /> Saved!
                 </motion.div>

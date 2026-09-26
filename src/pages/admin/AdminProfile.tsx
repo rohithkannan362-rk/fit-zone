@@ -158,7 +158,7 @@ export default function AdminProfile() {
   const avatarUrl = user?.member?.avatar_url;
 
   return (
-    <div className="min-h-screen bg-[#030303] text-white p-4 sm:p-6 md:p-12 overflow-x-hidden selection:bg-gym-red selection:text-white">
+    <div className="min-h-screen bg-[#030303] text-white p-4 sm:p-6 md:p-12 pb-24 md:pb-12 overflow-x-hidden selection:bg-gym-red selection:text-white">
       <div className="max-w-4xl mx-auto">
         <BackButton to="/admin" label="BACK TO DASHBOARD" />
 

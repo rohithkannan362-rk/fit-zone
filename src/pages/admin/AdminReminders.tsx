@@ -78,11 +78,11 @@ const AdminReminders = () => {
   if (loading) return <LoadingSpinner message="Loading reminders..." />;
 
   return (
-    <div className="min-h-screen bg-[#030303] text-white p-6 md:p-12">
+    <div className="min-h-screen bg-[#030303] text-white p-4 sm:p-6 md:p-12 pb-24 md:pb-12">
       <div className="max-w-4xl mx-auto">
         <BackButton to="/admin" label="BACK TO DASHBOARD" />
-        <div className="mb-10">
-          <h2 className="text-3xl md:text-4xl font-black uppercase tracking-tighter mb-2">
+        <div className="mb-6 sm:mb-10">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-black uppercase tracking-tighter mb-1 sm:mb-2">
             Reminder <span className="text-gym-red">Management</span>
           </h2>
           <p className="text-white/40 text-[10px] font-bold uppercase tracking-[0.2em]">
@@ -92,7 +92,7 @@ const AdminReminders = () => {
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-3 mb-8">
+        <div className="flex flex-wrap gap-2 sm:gap-3 mb-6 sm:mb-8">
           {[
             {
               id: "paused" as const,
@@ -108,7 +108,7 @@ const AdminReminders = () => {
             <button
               key={t.id}
               onClick={() => setTab(t.id)}
-              className={`px-5 py-2.5 text-[9px] font-bold uppercase tracking-widest rounded-lg transition-all ${
+              className={`px-3.5 sm:px-5 py-2 sm:py-2.5 text-[9px] font-bold uppercase tracking-widest rounded-lg transition-all ${
                 tab === t.id
                   ? "bg-white text-black"
                   : "bg-[#0a0a0a] border border-white/5 text-white/50 hover:text-white"
@@ -127,10 +127,10 @@ const AdminReminders = () => {
                   {pausedMemberships.map((ms) => (
                     <div
                       key={ms.id}
-                      className="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-[#111] transition-colors"
+                      className="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-[#111] transition-colors"
                     >
-                      <div className="flex items-center gap-4">
-                        <PauseCircle className="w-5 h-5 text-blue-500" />
+                      <div className="flex items-center gap-3 sm:gap-4">
+                        <PauseCircle className="w-5 h-5 text-blue-500 shrink-0" />
                         <div>
                           <Link
                             to={`/admin/members/${ms.member_id}`}
@@ -150,7 +150,7 @@ const AdminReminders = () => {
                       </div>
                       <button
                         onClick={() => handleResume(ms.id)}
-                        className="bg-green-500/10 hover:bg-green-500/20 text-green-500 border border-green-500/20 px-4 py-2 text-[9px] font-bold uppercase tracking-widest rounded-lg transition-all flex items-center gap-2"
+                        className="w-full sm:w-auto justify-center bg-green-500/10 hover:bg-green-500/20 text-green-500 border border-green-500/20 px-4 py-2 text-[9px] font-bold uppercase tracking-widest rounded-lg transition-all flex items-center gap-2"
                       >
                         <PlayCircle className="w-4 h-4" /> Resume
                       </button>
@@ -175,10 +175,10 @@ const AdminReminders = () => {
                     <Link
                       key={ms.id}
                       to={`/admin/members/${ms.member_id}`}
-                      className="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-[#111] transition-colors"
+                      className="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-[#111] transition-colors"
                     >
-                      <div className="flex items-center gap-4">
-                        <Clock className="w-5 h-5 text-white/30" />
+                      <div className="flex items-center gap-3 sm:gap-4">
+                        <Clock className="w-5 h-5 text-white/30 shrink-0" />
                         <div>
                           <p className="font-bold text-sm uppercase tracking-wider">
                             {getMemberName(ms.member_id)}

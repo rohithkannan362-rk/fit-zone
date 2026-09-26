@@ -44,38 +44,38 @@ const PackageSelection = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#030303] text-white py-20 px-6 relative overflow-hidden">
+    <div className="min-h-screen bg-[#030303] text-white py-12 sm:py-16 md:py-20 px-4 sm:px-6 pb-24 md:pb-12 relative overflow-hidden">
       <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
       <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-gym-red/5 rounded-full mix-blend-screen filter blur-[200px] opacity-40 pointer-events-none"></div>
 
       <Link
         to="/member/dashboard"
-        className="absolute top-8 left-8 text-white/50 hover:text-white flex items-center gap-2 transition-colors z-20"
+        className="absolute top-4 left-4 sm:top-8 sm:left-8 text-white/50 hover:text-white flex items-center gap-2 transition-colors z-20 min-h-[44px]"
       >
         <ChevronLeft className="w-5 h-5" />
-        <span className="font-bold tracking-widest text-sm uppercase">
+        <span className="font-bold tracking-widest text-xs sm:text-sm uppercase">
           Back
         </span>
       </Link>
 
-      <div className="max-w-4xl mx-auto relative z-10">
+      <div className="max-w-4xl mx-auto relative z-10 pt-8 sm:pt-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-16"
+          className="text-center mb-10 sm:mb-16"
         >
-          <div className="inline-block bg-white p-2 rounded-sm shadow-[0_0_20px_rgba(255,51,51,0.2)] mb-6">
+          <div className="inline-flex items-center justify-center bg-white w-14 h-14 sm:w-16 sm:h-16 rounded-full p-2 shadow-[0_0_20px_rgba(255,51,51,0.25)] border border-white/20 mb-4 sm:mb-6 overflow-hidden">
             <img
               src="/logo.jpg"
               alt="FIT ZONE"
-              className="h-10 w-auto object-contain"
+              className="w-full h-full object-contain rounded-full"
             />
           </div>
-          <h1 className="text-4xl md:text-5xl font-black uppercase tracking-tighter mb-3">
+          <h1 className="text-2xl sm:text-4xl md:text-5xl font-black uppercase tracking-tighter mb-2 sm:mb-3">
             {user?.member ? "Renew" : "Welcome to"}{" "}
             <span className="text-gym-red">FIT ZONE</span>
           </h1>
-          <p className="text-white/60 mt-4 max-w-lg mx-auto">
+          <p className="text-white/60 text-xs sm:text-sm mt-2 sm:mt-4 max-w-lg mx-auto">
             Select a membership package to begin your fitness journey.
           </p>
         </motion.div>
@@ -102,7 +102,7 @@ const PackageSelection = () => {
           </div>
         ) : (
           <>
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8 sm:mb-12">
               {packages.map((pkg, idx) => (
                 <motion.div
                   key={pkg.id}
@@ -110,7 +110,7 @@ const PackageSelection = () => {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5, delay: idx * 0.1 }}
                   onClick={() => setSelectedId(pkg.id!)}
-                  className={`relative p-8 rounded-sm cursor-pointer transition-all duration-300 hover:-translate-y-2 flex flex-col group ${
+                  className={`relative p-5 sm:p-8 rounded-xl cursor-pointer transition-all duration-300 hover:-translate-y-2 flex flex-col group ${
                     selectedId === pkg.id
                       ? "bg-[#0a0a0a] border-2 border-gym-red shadow-[0_0_30px_rgba(255,51,51,0.15)]"
                       : "bg-[#0a0a0a] border-2 border-white/10 hover:border-white/30"
@@ -133,8 +133,8 @@ const PackageSelection = () => {
                   </h3>
 
                   <div className="flex items-start justify-center gap-1 mb-2">
-                    <span className="text-xl font-bold mt-1">₹</span>
-                    <span className="text-5xl font-black">
+                    <span className="text-lg sm:text-xl font-bold mt-1">₹</span>
+                    <span className="text-3xl sm:text-5xl font-black">
                       {pkg.price.toLocaleString("en-IN")}
                     </span>
                   </div>
@@ -184,7 +184,7 @@ const PackageSelection = () => {
               >
                 <button
                   onClick={handleSelect}
-                  className="bg-gym-red hover:bg-red-600 text-white px-12 py-5 text-sm font-bold uppercase tracking-widest transition-all duration-300 shadow-[0_0_30px_rgba(255,51,51,0.4)] hover:shadow-[0_0_50px_rgba(255,51,51,0.6)] inline-flex items-center gap-3"
+                  className="bg-gym-red hover:bg-red-600 text-white w-full sm:w-auto px-6 sm:px-12 py-4 sm:py-5 text-xs sm:text-sm font-bold uppercase tracking-widest transition-all duration-300 shadow-[0_0_30px_rgba(255,51,51,0.4)] hover:shadow-[0_0_50px_rgba(255,51,51,0.6)] inline-flex items-center justify-center gap-3"
                 >
                   Continue with {selectedPackage.name} —{" "}
                   {formatCurrency(selectedPackage.price)}

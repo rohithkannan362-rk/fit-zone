@@ -34,6 +34,8 @@
 
   html {
     scroll-behavior: smooth;
+    overflow-x: hidden;
+    max-width: 100vw;
   }
 }
 
@@ -51,11 +53,11 @@
   }
 
   .btn-primary {
-    @apply relative overflow-hidden px-8 py-4 bg-gym-red text-white font-bold rounded-none tracking-widest uppercase transition-all duration-300 hover:bg-white hover:text-gym-black;
+    @apply relative overflow-hidden px-5 sm:px-8 py-3.5 sm:py-4 bg-gym-red text-white font-bold rounded-none tracking-widest uppercase transition-all duration-300 hover:bg-white hover:text-gym-black;
   }
 
   .btn-secondary {
-    @apply relative px-8 py-4 bg-transparent border-2 border-white/20 text-white font-bold rounded-none tracking-widest uppercase transition-all duration-300 hover:border-white;
+    @apply relative px-5 sm:px-8 py-3.5 sm:py-4 bg-transparent border-2 border-white/20 text-white font-bold rounded-none tracking-widest uppercase transition-all duration-300 hover:border-white;
   }
 
   .bg-grid-pattern {
